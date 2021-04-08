@@ -60,12 +60,12 @@
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
-  printf("Reading From Address 0x%x value=0x%x\n",addr,val);
+  printf("Reading From Address 0x%x value=0x%lx\n",addr,val);
   return val;
 }
 
 void writeReg(uint32_t addr,uint32_t value) {
-	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
+	printf("Writing to Address 0x%x value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
 
