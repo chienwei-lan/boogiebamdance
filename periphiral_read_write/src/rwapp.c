@@ -64,14 +64,13 @@ uint32_t readReg(uint32_t addr) {
   return val;
 }
 
-void writeReg(uint32_t addr,uint8_t value) {
+void writeReg(uint32_t addr,uint32_t value) {
 	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
 
 void init_interrupt(void)
 {
-
     printf("%s\n", __func__);
     writeReg(IPU_INTC_MER_ADDR,0x1);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
@@ -90,9 +89,9 @@ void init_command_queue(void)
 void ipu_isr(void)
 {
      printf("ISR ISR ISR\n");
-     readReg(IPU_INTC_IPR_ADDR);
+     uint32_t val = readReg(IPU_INTC_IPR_ADDR);
 
-     writeReg(IPU_INTC_IAR_ADDR, 0x1)
+     writeReg(IPU_INTC_IAR_ADDR, val);
 } 
 
 int main()
