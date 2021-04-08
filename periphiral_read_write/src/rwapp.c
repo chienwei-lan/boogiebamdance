@@ -89,9 +89,16 @@ void init_command_queue(void)
 void ipu_isr(void)
 {
      printf("ISR ISR ISR\n");
-     uint32_t val = readReg(IPU_INTC_IPR_ADDR);
+     uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
-     writeReg(IPU_INTC_IAR_ADDR, val);
+     if (intc_mask & 0x1) // host interrupt
+          printf("SQ door bell rings, go to answer it\n");
+
+     if (intc_mask & 0x2)
+        printf("DPU comes back\n");
+
+
+     writeReg(IPU_INTC_IAR_ADDR, intc_mask);
 } 
 
 int main()
@@ -102,7 +109,6 @@ int main()
 
     microblaze_register_handler((XInterruptHandler) ipu_isr, (void *) 0);
     microblaze_enable_interrupts();
-
 
     init_interrupt();
 #if 0
