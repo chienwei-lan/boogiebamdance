@@ -56,6 +56,51 @@
 #define IPU_INTC_IAR_ADDR                 (IPU_INTC_BASEADDR + 0x0C) /* acknowledge */
 #define IPU_INTC_MER_ADDR                 (IPU_INTC_BASEADDR + 0x1C) /* master enable */
 
+#define IPU_SQ_ADDR                       (IPU_DDR_BASEADDR)
+#define IPU_CQ_ADDR                       (IPU_DDR_BASEADDR  + 0x1000)
+
+
+struct ert_sq_cmd {
+  union {
+    struct {
+      uint32_t state:4;   /* [3-0]   */
+      uint32_t custom:8;  /* [11-4]  */
+      uint32_t count:11;  /* [22-12] */     
+      uint32_t opcode:5;  /* [27-23] */
+      uint32_t type:3;    /* [30-28] */
+      uint32_t tag:1      /* [31] */
+    }; 
+    uint32_t header;
+  };
+  union {
+    struct {
+      uint32_t cmd_identifier:16;  /* [15-0]  */
+      uint32_t reserved:16;        /* [31-16] */
+    }; 
+    uint32_t word1;
+  };
+}; 
+
+struct ert_admin_sq_cmd {
+  union {
+    struct {
+      uint32_t state:4;   /* [3-0]   */
+      uint32_t custom:8;  /* [11-4]  */
+      uint32_t count:11;  /* [22-12] */     
+      uint32_t opcode:6;  /* [27-23] */
+      uint32_t type:2;    /* [30-28] */
+      uint32_t tag:1      /* [31] */
+    }; 
+    uint32_t header;
+  };
+  union {
+    struct {
+      uint32_t cmd_identifier:16;  /* [15-0]  */
+      uint32_t reserved:16;        /* [31-16] */
+    }; 
+    uint32_t word1;
+  };
+}; 
 
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
@@ -75,7 +120,7 @@ void init_interrupt(void)
     writeReg(IPU_INTC_MER_ADDR,0x1);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
-    writeReg(IPU_INTC_ISR_ADDR,0x1);
+    writeReg(IPU_INTC_ISR_ADDR,0x3);
 
 }
 
@@ -88,11 +133,13 @@ void init_command_queue(void)
 
 void ipu_isr(void)
 {
-     printf("ISR ISR ISR\n");
+     printf("%s \n", __func__);
      uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
-     if (intc_mask & 0x1) // host interrupt
+     if (intc_mask & 0x1) {// host interrupt
           printf("SQ door bell rings, go to answer it\n");
+
+     }
 
      if (intc_mask & 0x2)
         printf("DPU comes back\n");
@@ -111,7 +158,7 @@ int main()
     microblaze_enable_interrupts();
 
     init_interrupt();
-#if 0
+
     //RW to SRAM
     printf("READ/WRITE TEST FOR SRAM\n");
     writeReg(IPU_SRAM_BASEADDR,0x1);
@@ -120,10 +167,6 @@ int main()
     printf("READ/WRITE TEST FOR DDR\n");
     writeReg(IPU_DDR_BASEADDR,0x1);
     readReg(IPU_DDR_BASEADDR);
-    //ACCESS INTC
-    printf("READ/WRITE TEST FOR INTC\n");
-    writeReg(IPU_INTC_BASEADDR,0x1);
-    readReg(IPU_INTC_BASEADDR);
     //ACCESS C2H Mailbox
     printf("READ/WRITE TEST FOR C2HMAILBOX\n");
     writeReg(IPU_C2HMAILBOX_BASEADDR,0x1);
@@ -144,7 +187,7 @@ int main()
     printf("READ/WRITE TEST FOR STRM2AXI0\n");
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
-#endif
+
     cleanup_platform();
     return 0;
 }
