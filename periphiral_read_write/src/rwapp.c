@@ -72,13 +72,12 @@ struct ert_sq_cmd {
     }; 
     uint32_t header;
   };
-  union {
-    struct {
-      uint32_t cmd_identifier:16;  /* [15-0]  */
-      uint32_t reserved:16;        /* [31-16] */
-    }; 
-    uint32_t word1;
-  };
+
+  struct {
+    uint32_t cmd_identifier:16;  /* [15-0]  */
+    uint32_t reserved:16;        /* [31-16] */
+  }; 
+
 }; 
 
 struct ert_admin_sq_cmd {
@@ -93,13 +92,12 @@ struct ert_admin_sq_cmd {
     }; 
     uint32_t header;
   };
-  union {
-    struct {
-      uint32_t cmd_identifier:16;  /* [15-0]  */
-      uint32_t reserved:16;        /* [31-16] */
-    }; 
-    uint32_t word1;
-  };
+
+  struct {
+    uint32_t cmd_identifier:16;  /* [15-0]  */
+    uint32_t reserved:16;        /* [31-16] */
+  }; 
+
 }; 
 
 uint32_t readReg(uint32_t addr) {
@@ -148,6 +146,19 @@ void ipu_isr(void)
      writeReg(IPU_INTC_IAR_ADDR, intc_mask);
 } 
 
+void go_loop(void)
+{
+    uint32_t cnt = 0;
+
+    while(1) {
+        if (cnt++ == 0x10000000) {
+            cnt = 0;
+            printf("cnt resume\n");
+        }
+    }
+
+}
+
 int main()
 {
     init_platform();
@@ -188,6 +199,10 @@ int main()
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
 
+
+
     cleanup_platform();
+
+    go_loop();
     return 0;
 }
