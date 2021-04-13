@@ -60,6 +60,8 @@
 #define IPU_CQ_ADDR                       (IPU_DDR_BASEADDR  + 0x1000)
 
 
+static bool there_is_pending_cmd = false;
+
 struct ert_sq_cmd {
   union {
     struct {
@@ -136,6 +138,7 @@ void ipu_isr(void)
 
      if (intc_mask & 0x1) {// host interrupt
           printf("SQ door bell rings, go to answer it\n");
+          there_is_pending_cmd = true;
 
      }
 
@@ -153,7 +156,11 @@ void go_loop(void)
     while(1) {
         if (cnt++ == 0x10000000) {
             cnt = 0;
-            printf("cnt resume\n");
+
+            if (there_is_pending_cmd) {
+                there_is_pending_cmd = false;
+                printf("pending_to_queue cmd\n");
+            }
         }
     }
 
