@@ -73,7 +73,7 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 {
   uint32_t value;
   xclRead(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
-  printf("Reading From Address 0x%x value=0x%x\n",addr,value);
+  //printf("Reading From Address 0x%x value=0x%x\n",addr,value);
   return value;
 }
 
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
     std::cout << "Finished loading xclbin " << bit << std::endl;
 
 
-    for (uint32_t i = 4; i < 0x100; i+=4) {
+    for (uint32_t i = 4; i < 0x80000; i+=4) {
         uint32_t *val = (uint32_t *)(bit+i);
         writeReg(handle, IPU_SRAM_BASEADDR+i,*val);
     }
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
             uint32_t val = readReg(handle, IPU_DDR_BASEADDR);
             cnt = 0;
             if (val == 0x12341234) {
-                    for (uint32_t i = 4; i < 0x100; i+=4) {
+                    for (uint32_t i = 4; i < 0x80000; i+=4) {
                         uint32_t *val = (uint32_t *)(bit+i);
                         uint32_t dram_val = readReg(handle, IPU_DDR_BASEADDR+i);
                         if (*val != dram_val)
