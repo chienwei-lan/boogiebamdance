@@ -182,6 +182,7 @@ void go_loop(void)
         if (cnt++ == 0x10000000) {
             cnt = 0;
             uint32_t val = readReg(IPU_H2C_MB_RDDATA);
+            readReg(IPU_C2H_MB_RDDATA);
             if (val == 0xEF) {
                 readReg(IPU_H2C_MB_STATUS);
                 readReg(IPU_H2C_MB_ERROR);
