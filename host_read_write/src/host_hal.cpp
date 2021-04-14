@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     int size = stream.tellg();
     stream.seekg(0, stream.beg);
 
-    constchar* header = new char[size];
+    char* header = new char[size];
     stream.read(header, size);
 
     const xclBin* blob = (const xclBin*)header;
