@@ -59,6 +59,10 @@
 #define IPU_SQ_ADDR                       (IPU_DDR_BASEADDR)
 #define IPU_CQ_ADDR                       (IPU_DDR_BASEADDR  + 0x1000)
 
+#define MB_PRINTF(fmt, arg...)   \
+        printf("[Microblaze]" fmt "\n", ##arg)
+        
+
 
 static uint8_t there_is_pending_cmd = 0;
 
@@ -177,7 +181,7 @@ int main()
     init_interrupt();
 
     //RW to SRAM
-    printf("READ/WRITE TEST FOR SRAM\n");
+    MB_PRINTF("READ/WRITE TEST FOR SRAM\n");
     writeReg(IPU_SRAM_BASEADDR,0x1);
     readReg(IPU_SRAM_BASEADDR);
     //RW to DDR
