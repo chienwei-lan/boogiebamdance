@@ -142,7 +142,14 @@ int main(int argc, char **argv) {
             uint32_t val = readReg(handle, IPU_DDR_BASEADDR);
             cnt = 0;
             if (val == 0x12341234) {
-                std::cout << "val " << std::hex << val << std::endl;
+                    for (uint32_t i = 4; i < 0x100; i+=4) {
+                        uint32_t *val = (uint32_t *)(bit+i);
+                        uint32_t dram_val = readReg(handle, IPU_DDR_BASEADDR+i);
+                        if (*val != dram_val)
+                            std::cout << std::hex << "dram " << dram_val << " sram " << *val << "data mismatch at index" << i << std::endl;
+                    }
+
+                    std::cout << "Datat integratity PASSED" << std::endl;
                 break;
             }
         }
