@@ -215,6 +215,10 @@ int main()
     MB_PRINTF("READ/WRITE TEST FOR DDR\n");
     writeReg(IPU_DDR_BASEADDR,0x1);
     readReg(IPU_DDR_BASEADDR);
+
+
+    writeReg(IPU_H2C_MB_CTRL, 0x3);
+    writeReg(IPU_C2H_MB_CTRL, 0x3);
 #if 0
     //ACCESS C2H Mailbox
     MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
