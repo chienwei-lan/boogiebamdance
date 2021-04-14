@@ -60,7 +60,7 @@
 #define IPU_CQ_ADDR                       (IPU_DDR_BASEADDR  + 0x1000)
 
 #define MB_PRINTF(fmt, arg...)   \
-        printf("[Microblaze]" fmt "\n", ##arg)
+        printf("[ Microblaze ]" fmt "\n", ##arg)
         
 
 
@@ -109,18 +109,18 @@ struct ert_admin_sq_cmd {
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
-  printf("Reading From Address 0x%lx value=0x%lx\n",addr,val);
+  MB_PRINTF("Reading From Address 0x%lx value=0x%lx\n",addr,val);
   return val;
 }
 
 void writeReg(uint32_t addr,uint32_t value) {
-	printf("Writing to Address 0x%lx value=0x%lx\n",addr,value);
+	MB_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
 
 void init_interrupt(void)
 {
-    printf("%s\n", __func__);
+    MB_PRINTF("%s\n", __func__);
     writeReg(IPU_INTC_MER_ADDR,0x1);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
@@ -131,23 +131,23 @@ void init_interrupt(void)
 
 void init_command_queue(void)
 {
-    printf("Initial command queue\n");
+    MB_PRINTF("Initial command queue\n");
 }
 
 
 void ipu_isr(void)
 {
-     printf("%s \n", __func__);
+     MB_PRINTF("%s \n", __func__);
      uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
      if (intc_mask & 0x1) {// host interrupt
-          printf("SQ door bell rings, go to answer it\n");
+          MB_PRINTF("SQ door bell rings, go to answer it\n");
           there_is_pending_cmd = 1;
 
      }
 
      if (intc_mask & 0x2)
-        printf("DPU comes back\n");
+        MB_PRINTF("DPU comes back\n");
 
 
      writeReg(IPU_INTC_IAR_ADDR, intc_mask);
@@ -185,27 +185,27 @@ int main()
     writeReg(IPU_SRAM_BASEADDR,0x1);
     readReg(IPU_SRAM_BASEADDR);
     //RW to DDR
-    printf("READ/WRITE TEST FOR DDR\n");
+    MB_PRINTF("READ/WRITE TEST FOR DDR\n");
     writeReg(IPU_DDR_BASEADDR,0x1);
     readReg(IPU_DDR_BASEADDR);
     //ACCESS C2H Mailbox
-    printf("READ/WRITE TEST FOR C2HMAILBOX\n");
+    MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
     writeReg(IPU_C2HMAILBOX_BASEADDR,0x1);
     readReg(IPU_C2HMAILBOX_BASEADDR);
     //ACCESS H2C MailBox
-    printf("READ/WRITE TEST FOR H2CMAILBOX\n");
+    MB_PRINTF("READ/WRITE TEST FOR H2CMAILBOX\n");
     writeReg(IPU_H2CMAILBOX_BASEADDR,0x1);
     readReg(IPU_H2CMAILBOX_BASEADDR);
     //ACCESS STRM2AXI0
-    printf("READ/WRITE TEST FOR STRM2AXI0\n");
+    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
     writeReg(IPU_STRM2AXI0_BASEADDR,0x1);
     readReg(IPU_STRM2AXI0_BASEADDR);
     //ACCESS STRM2AXI0
-    printf("READ/WRITE TEST FOR STRM2AXI0\n");
+    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
     writeReg(IPU_STRM2AXI1_BASEADDR,0x1);
     readReg(IPU_STRM2AXI1_BASEADDR);
     //ACCESS STRM2AXI0
-    printf("READ/WRITE TEST FOR STRM2AXI0\n");
+    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
 
