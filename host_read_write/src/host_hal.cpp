@@ -79,7 +79,7 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 
 void writeReg(xclDeviceHandle& handle, uint32_t addr,uint32_t value) 
 {
-	//printf("Writing to Address 0x%x value=0x%x\n",addr,value);
+	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
     xclWrite(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
 }
 
@@ -117,7 +117,8 @@ int main(int argc, char **argv) {
     //printf("READ/WRITE TEST FOR SRAM\n");
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
-#if 0
+    writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
+
     uint32_t cnt = 0;
     while (1) {
         if (cnt++ ==0x10000000) {
@@ -132,8 +133,6 @@ int main(int argc, char **argv) {
 
 
     }
-#endif
-    writeReg(handle, IPU_H2CMAILBOX_BASEADDR,0xEF);
 
 #if 0
     //RW to DDR
