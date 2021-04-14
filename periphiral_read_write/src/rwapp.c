@@ -181,9 +181,8 @@ void go_loop(void)
     while(1) {
         if (cnt++ == 0x10000000) {
             cnt = 0;
-            uint32_t val = readReg(IPU_H2CMAILBOX_BASEADDR);
+            uint32_t val = readReg(IPU_H2C_MB_RDDATA);
             if (val == 0xEF) {
-                readReg(IPU_H2C_MB_RDDATA);
                 readReg(IPU_H2C_MB_STATUS);
                 readReg(IPU_H2C_MB_ERROR);
                 readReg(IPU_H2C_MB_IS);
