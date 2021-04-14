@@ -73,7 +73,7 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 {
   uint32_t value;
   xclRead(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
-  //printf("Reading From Address 0x%x value=0x%x\n",addr,value);
+  printf("Reading From Address 0x%x value=0x%x\n",addr,value);
   return value;
 }
 
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     readReg(handle, IPU_H2C_MB_CTRL);
 #endif
 
-
+#if 0
     uint32_t cnt = 0;
     while (1) {
         if (cnt++ ==0x10000000) {
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
 
 
     }
-
+#endif
 #if 0
     //RW to DDR
     printf("READ/WRITE TEST FOR DDR\n");

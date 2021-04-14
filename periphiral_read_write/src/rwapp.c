@@ -59,10 +59,6 @@
 #define IPU_SQ_ADDR                       (IPU_DDR_BASEADDR)
 #define IPU_CQ_ADDR                       (IPU_DDR_BASEADDR  + 0x1000)
 
-#define MB_PRINTF(fmt, arg...)   \
-        printf("[ Microblaze ]" fmt "\n", ##arg)
-        
-
 #define IPU_H2C_MB_WRDATA                 (IPU_H2CMAILBOX_BASEADDR)        /* write data */
 #define IPU_H2C_MB_RDDATA                 (IPU_H2CMAILBOX_BASEADDR+0x8)    /* read data */
 #define IPU_H2C_MB_STATUS                 (IPU_H2CMAILBOX_BASEADDR+0x10)   /* status */
@@ -86,6 +82,10 @@
 #define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
 
 static uint8_t there_is_pending_cmd = 0;
+
+
+#define MB_PRINTF(fmt, arg...)   \
+        printf("[ Microblaze ]" fmt "\n", ##arg)
 
 struct ert_sq_cmd {
   union {
@@ -232,15 +232,6 @@ int main()
     init_interrupt();
 
     init_comm_channel();
-
-    //RW to SRAM
-    MB_PRINTF("READ/WRITE TEST FOR SRAM\n");
-    writeReg(IPU_SRAM_BASEADDR,0x1);
-    readReg(IPU_SRAM_BASEADDR);
-    //RW to DDR
-    MB_PRINTF("READ/WRITE TEST FOR DDR\n");
-    writeReg(IPU_DDR_BASEADDR,0x1);
-    readReg(IPU_DDR_BASEADDR);
 
     writeReg(IPU_C2H_MB_WRDATA, 0xCD);
     writeReg(IPU_H2C_MB_WRDATA, 0xAD);
