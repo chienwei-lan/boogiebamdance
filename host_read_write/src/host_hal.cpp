@@ -123,9 +123,12 @@ int main(int argc, char **argv) {
     //printf("READ/WRITE TEST FOR SRAM\n");
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
-    writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
+    //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
 
-    readReg(handle, IPU_C2H_MB_RDDATA);
+    uint32_t haha = readReg(handle, IPU_C2H_MB_RDDATA);
+    std::cout << "C2H RDDATA: " << haha << std::endl;
+    haha = readReg(handle, IPU_H2C_MB_RDDATA);
+    std::cout << "H2C RDDATA: " << haha << std::endl;
 
 
     readReg(handle, IPU_H2C_MB_STATUS);

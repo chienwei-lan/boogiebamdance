@@ -230,6 +230,7 @@ int main()
 
 
     writeReg(IPU_C2H_MB_WRDATA, 0xCD);
+    writeReg(IPU_H2C_MB_WRDATA, 0xAD);
 
 
     readReg(IPU_H2C_MB_STATUS);
