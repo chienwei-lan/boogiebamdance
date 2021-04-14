@@ -156,10 +156,9 @@ void go_loop(void)
     while(1) {
         if (cnt++ == 0x10000000) {
             cnt = 0;
-
-            if (there_is_pending_cmd) {
-                there_is_pending_cmd = 0;
-                printf("pending_to_queue cmd\n");
+            uint32_t val = readReg(IPU_SRAM_BASEADDR);
+            if (val == 0xABCDABCD) {
+                writeReg(IPU_DDR_BASEADDR,0x12341234);
             }
         }
     }
@@ -172,7 +171,7 @@ int main()
 
     init_command_queue();
 
-    microblaze_register_handler((XInterruptHandler) ipu_isr, (void *) 0);
+    microblaze_register_handler((XInterruptHandler)ipu_isr, (void *) 0);
     microblaze_enable_interrupts();
 
     init_interrupt();

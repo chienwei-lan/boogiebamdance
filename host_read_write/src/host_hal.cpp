@@ -84,8 +84,25 @@ int main(int argc, char **argv) {
 
     //RW to SRAM
     printf("READ/WRITE TEST FOR SRAM\n");
-    writeReg(handle, IPU_SRAM_BASEADDR,0x1);
+    writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
+
+    uint32_t cnt = 0;
+    while (1) {
+        if (cnt++ ==0x10000000) {
+            uint32_t val = readReg(handle, IPU_DDR_BASEADDR);
+            cnt = 0;
+            if (val == 0x12341234) {
+                std::cout << "val " << std::hex << val << std::endl;
+                break;
+            }
+        }
+
+
+
+    }
+
+#if 0
     //RW to DDR
     printf("READ/WRITE TEST FOR DDR\n");
     writeReg(handle, IPU_DDR_BASEADDR,0x1);
@@ -98,7 +115,7 @@ int main(int argc, char **argv) {
     printf("READ/WRITE TEST FOR H2CMAILBOX\n");
     writeReg(handle, IPU_H2CMAILBOX_BASEADDR,0x1);
     readReg(handle, IPU_H2CMAILBOX_BASEADDR);
-
+#endif
     std::cout << "finished execution" << std::endl;
 
     return 0; 
