@@ -37,20 +37,51 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 #include "ipu_platform_host.h"
 
+
+#define IPU_H2C_MB_WRDATA                 (IPU_H2CMAILBOX_BASEADDR)        /* write data */
+#define IPU_H2C_MB_RDDATA                 (IPU_H2CMAILBOX_BASEADDR+0x8)    /* read data */
+#define IPU_H2C_MB_STATUS                 (IPU_H2CMAILBOX_BASEADDR+0x10)   /* status */
+#define IPU_H2C_MB_ERROR                  (IPU_H2CMAILBOX_BASEADDR+0x14)   /* error */
+#define IPU_H2C_MB_SIT                    (IPU_H2CMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
+#define IPU_H2C_MB_RIT                    (IPU_H2CMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
+#define IPU_H2C_MB_IS                     (IPU_H2CMAILBOX_BASEADDR+0x20)   /* interrupt status */
+#define IPU_H2C_MB_IE                     (IPU_H2CMAILBOX_BASEADDR+0x24)   /* error */
+#define IPU_H2C_MB_IP                     (IPU_H2CMAILBOX_BASEADDR+0x28)   /* interrupt pending */
+#define IPU_H2C_MB_CTRL                   (IPU_H2CMAILBOX_BASEADDR+0x2C)   /* control */
+
+#define IPU_C2H_MB_WRDATA                 (IPU_C2HMAILBOX_BASEADDR)        /* write data */
+#define IPU_C2H_MB_RDDATA                 (IPU_C2HMAILBOX_BASEADDR+0x8)    /* read data */
+#define IPU_C2H_MB_STATUS                 (IPU_C2HMAILBOX_BASEADDR+0x10)   /* status */
+#define IPU_C2H_MB_ERROR                  (IPU_C2HMAILBOX_BASEADDR+0x14)   /* error */
+#define IPU_C2H_MB_SIT                    (IPU_C2HMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
+#define IPU_C2H_MB_RIT                    (IPU_C2HMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
+#define IPU_C2H_MB_IS                     (IPU_C2HMAILBOX_BASEADDR+0x20)   /* interrupt status */
+#define IPU_C2H_MB_IE                     (IPU_C2HMAILBOX_BASEADDR+0x24)   /* error */
+#define IPU_C2H_MB_IP                     (IPU_C2HMAILBOX_BASEADDR+0x28)   /* interrupt pending */
+#define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
+
+#define FLAG_STI                          (1 << 0)
+#define FLAG_RTI                          (1 << 1)
+
+#define STATUS_EMPTY                      (1 << 0)
+#define STATUS_FULL                       (1 << 1)
+#define STATUS_STA                        (1 << 2)
+#define STATUS_RTA                        (1 << 3)
+
+
 uint32_t readReg(xclDeviceHandle& handle, uint32_t addr) 
 {
   uint32_t value;
   xclRead(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
-  printf("Reading From Address 0x%x value=0x%x\n",addr,value);
+  //printf("Reading From Address 0x%x value=0x%x\n",addr,value);
   return value;
 }
 
 void writeReg(xclDeviceHandle& handle, uint32_t addr,uint32_t value) 
 {
-	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
+	//printf("Writing to Address 0x%x value=0x%x\n",addr,value);
     xclWrite(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
 }
-
 
 ////////MAIN FUNCTION//////////
 int main(int argc, char **argv) {
@@ -83,10 +114,10 @@ int main(int argc, char **argv) {
     std::cout << "Finished loading xclbin " << bit << std::endl;
 
     //RW to SRAM
-    printf("READ/WRITE TEST FOR SRAM\n");
+    //printf("READ/WRITE TEST FOR SRAM\n");
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
-
+#if 0
     uint32_t cnt = 0;
     while (1) {
         if (cnt++ ==0x10000000) {
@@ -101,6 +132,8 @@ int main(int argc, char **argv) {
 
 
     }
+#endif
+    writeReg(handle, IPU_H2CMAILBOX_BASEADDR,0xEF);
 
 #if 0
     //RW to DDR

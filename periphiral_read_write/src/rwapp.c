@@ -63,6 +63,27 @@
         printf("[ Microblaze ]" fmt "\n", ##arg)
         
 
+#define IPU_H2C_MB_WRDATA                 (IPU_H2CMAILBOX_BASEADDR)        /* write data */
+#define IPU_H2C_MB_RDDATA                 (IPU_H2CMAILBOX_BASEADDR+0x8)    /* read data */
+#define IPU_H2C_MB_STATUS                 (IPU_H2CMAILBOX_BASEADDR+0x10)   /* status */
+#define IPU_H2C_MB_ERROR                  (IPU_H2CMAILBOX_BASEADDR+0x14)   /* error */
+#define IPU_H2C_MB_SIT                    (IPU_H2CMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
+#define IPU_H2C_MB_RIT                    (IPU_H2CMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
+#define IPU_H2C_MB_IS                     (IPU_H2CMAILBOX_BASEADDR+0x20)   /* interrupt status */
+#define IPU_H2C_MB_IE                     (IPU_H2CMAILBOX_BASEADDR+0x24)   /* error */
+#define IPU_H2C_MB_IP                     (IPU_H2CMAILBOX_BASEADDR+0x28)   /* interrupt pending */
+#define IPU_H2C_MB_CTRL                   (IPU_H2CMAILBOX_BASEADDR+0x2C)   /* control */
+
+#define IPU_C2H_MB_WRDATA                 (IPU_C2HMAILBOX_BASEADDR)        /* write data */
+#define IPU_C2H_MB_RDDATA                 (IPU_C2HMAILBOX_BASEADDR+0x8)    /* read data */
+#define IPU_C2H_MB_STATUS                 (IPU_C2HMAILBOX_BASEADDR+0x10)   /* status */
+#define IPU_C2H_MB_ERROR                  (IPU_C2HMAILBOX_BASEADDR+0x14)   /* error */
+#define IPU_C2H_MB_SIT                    (IPU_C2HMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
+#define IPU_C2H_MB_RIT                    (IPU_C2HMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
+#define IPU_C2H_MB_IS                     (IPU_C2HMAILBOX_BASEADDR+0x20)   /* interrupt status */
+#define IPU_C2H_MB_IE                     (IPU_C2HMAILBOX_BASEADDR+0x24)   /* error */
+#define IPU_C2H_MB_IP                     (IPU_C2HMAILBOX_BASEADDR+0x28)   /* interrupt pending */
+#define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
 
 static uint8_t there_is_pending_cmd = 0;
 
@@ -160,9 +181,14 @@ void go_loop(void)
     while(1) {
         if (cnt++ == 0x10000000) {
             cnt = 0;
-            uint32_t val = readReg(IPU_SRAM_BASEADDR);
-            if (val == 0xABCDABCD) {
-                writeReg(IPU_DDR_BASEADDR,0x12341234);
+            uint32_t val = readReg(IPU_H2CMAILBOX_BASEADDR);
+            if (val == 0xEF) {
+                readReg(IPU_H2C_MB_RDDATA);
+                readReg(IPU_H2C_MB_STATUS);
+                readReg(IPU_H2C_MB_ERROR);
+                readReg(IPU_H2C_MB_IS);
+                readReg(IPU_H2C_MB_IP);
+                readReg(IPU_H2C_MB_CTRL);
             }
         }
     }
@@ -188,6 +214,7 @@ int main()
     MB_PRINTF("READ/WRITE TEST FOR DDR\n");
     writeReg(IPU_DDR_BASEADDR,0x1);
     readReg(IPU_DDR_BASEADDR);
+#if 0
     //ACCESS C2H Mailbox
     MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
     writeReg(IPU_C2HMAILBOX_BASEADDR,0x1);
@@ -208,7 +235,7 @@ int main()
     MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
-
+#endif
 
 
     cleanup_platform();
