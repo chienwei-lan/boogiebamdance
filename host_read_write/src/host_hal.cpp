@@ -73,7 +73,7 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 {
   uint32_t value;
   xclRead(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
-  //printf("Reading From Address 0x%x value=0x%x\n",addr,value);
+  printf("Reading From Address 0x%x value=0x%x\n",addr,value);
   return value;
 }
 
@@ -118,6 +118,13 @@ int main(int argc, char **argv) {
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
     writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
+    readReg(handle, IPU_H2C_MB_STATUS);
+    readReg(handle, IPU_H2C_MB_ERROR);
+    readReg(handle, IPU_H2C_MB_IS);
+    readReg(handle, IPU_H2C_MB_IP);
+    readReg(handle, IPU_H2C_MB_CTRL);
+
+
 
     uint32_t cnt = 0;
     while (1) {
