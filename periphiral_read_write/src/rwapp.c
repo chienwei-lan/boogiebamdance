@@ -204,6 +204,18 @@ void go_loop(void)
 
 }
 
+void init_comm_channel(void) {
+
+
+    writeReg(IPU_H2C_MB_CTRL, 0x3);
+    writeReg(IPU_C2H_MB_CTRL, 0x3);
+
+    writeReg(IPU_C2H_MB_IE,   0x0);
+    writeReg(IPU_C2H_MB_RIT,  0x0);
+    writeReg(IPU_C2H_MB_SIT,  0x0);
+
+}
+
 int main()
 {
     init_platform();
@@ -215,6 +227,8 @@ int main()
 
     init_interrupt();
 
+    init_comm_channel();
+
     //RW to SRAM
     MB_PRINTF("READ/WRITE TEST FOR SRAM\n");
     writeReg(IPU_SRAM_BASEADDR,0x1);
@@ -223,11 +237,6 @@ int main()
     MB_PRINTF("READ/WRITE TEST FOR DDR\n");
     writeReg(IPU_DDR_BASEADDR,0x1);
     readReg(IPU_DDR_BASEADDR);
-
-
-    writeReg(IPU_H2C_MB_CTRL, 0x3);
-    writeReg(IPU_C2H_MB_CTRL, 0x3);
-
 
     writeReg(IPU_C2H_MB_WRDATA, 0xCD);
     writeReg(IPU_H2C_MB_WRDATA, 0xAD);
