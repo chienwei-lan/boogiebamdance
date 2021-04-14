@@ -97,13 +97,13 @@ int main(int argc, char **argv) {
     handle = xclOpen(0, NULL, XCL_INFO);
 
     //! Load xclbin
-    char* bit = binaryFile.c_str();
+    const char* bit = binaryFile.c_str();
     ifstream stream(bit);
     stream.seekg(0, stream.end);
     int size = stream.tellg();
     stream.seekg(0, stream.beg);
 
-    const char* header = new char[size];
+    constchar* header = new char[size];
     stream.read(header, size);
 
     const xclBin* blob = (const xclBin*)header;
