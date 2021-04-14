@@ -181,14 +181,20 @@ void go_loop(void)
     while(1) {
         if (cnt++ == 0x10000000) {
             cnt = 0;
-            uint32_t val = readReg(IPU_H2C_MB_RDDATA);
-            readReg(IPU_C2H_MB_RDDATA);
-            if (val == 0xEF) {
+            uint32_t val = readReg(IPU_SRAM_BASEADDR);
+            //readReg(IPU_C2H_MB_RDDATA);
+            if (val == 0xABCDABCD) {
+                for (uint32_t i = 4; i < 0x100; i+=4) {
+                    uint32_t sram_val = readReg(IPU_SRAM_BASEADDR+i);
+                    writeReg(IPU_DDR_BASEADDR+i, sram_val);
+                }
+                #if 0
                 readReg(IPU_H2C_MB_STATUS);
                 readReg(IPU_H2C_MB_ERROR);
                 readReg(IPU_H2C_MB_IS);
                 readReg(IPU_H2C_MB_IP);
                 readReg(IPU_H2C_MB_CTRL);
+                #endif
                 writeReg(IPU_DDR_BASEADDR, 0x12341234);
             }
         }

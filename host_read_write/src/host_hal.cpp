@@ -79,7 +79,7 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 
 void writeReg(xclDeviceHandle& handle, uint32_t addr,uint32_t value) 
 {
-	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
+	//printf("Writing to Address 0x%x value=0x%x\n",addr,value);
     xclWrite(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
 }
 
@@ -93,11 +93,11 @@ int main(int argc, char **argv) {
     std::string binaryFile = argv[1];
 
     //! Create device handle
-    xclDeviceHandle handle; 
+    xclDeviceHandle handle;
     handle = xclOpen(0, NULL, XCL_INFO);
 
     //! Load xclbin
-    const char* bit = binaryFile.c_str();
+    char* bit = binaryFile.c_str();
     ifstream stream(bit);
     stream.seekg(0, stream.end);
     int size = stream.tellg();
@@ -112,6 +112,12 @@ int main(int argc, char **argv) {
         throw runtime_error("load xclbin failed");
     }
     std::cout << "Finished loading xclbin " << bit << std::endl;
+
+
+    for (uint32_t i = 4; i < 0x100; i+=4) {
+        uint32_t *val = (uint32_t *)(bit+i);
+        writeReg(handle, IPU_SRAM_BASEADDR+i,*val);
+    }
 
     //RW to SRAM
     //printf("READ/WRITE TEST FOR SRAM\n");
