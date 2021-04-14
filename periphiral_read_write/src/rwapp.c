@@ -219,6 +219,18 @@ int main()
 
     writeReg(IPU_H2C_MB_CTRL, 0x3);
     writeReg(IPU_C2H_MB_CTRL, 0x3);
+
+    readReg(IPU_H2C_MB_STATUS);
+    readReg(IPU_H2C_MB_ERROR);
+    readReg(IPU_H2C_MB_IS);
+    readReg(IPU_H2C_MB_IP);
+    readReg(IPU_H2C_MB_CTRL);
+
+    readReg(IPU_C2H_MB_STATUS);
+    readReg(IPU_C2H_MB_ERROR);
+    readReg(IPU_C2H_MB_IS);
+    readReg(IPU_C2H_MB_IP);
+    readReg(IPU_C2H_MB_CTRL);                    
 #if 0
     //ACCESS C2H Mailbox
     MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
