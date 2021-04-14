@@ -118,6 +118,10 @@ int main(int argc, char **argv) {
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
     writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
+
+    readReg(handle, IPU_C2H_MB_RDDATA);
+
+
     readReg(handle, IPU_H2C_MB_STATUS);
     readReg(handle, IPU_H2C_MB_ERROR);
     readReg(handle, IPU_H2C_MB_IS);

@@ -220,6 +220,10 @@ int main()
     writeReg(IPU_H2C_MB_CTRL, 0x3);
     writeReg(IPU_C2H_MB_CTRL, 0x3);
 
+
+    writeReg(IPU_C2H_MB_WRDATA, 0xCD);
+
+
     readReg(IPU_H2C_MB_STATUS);
     readReg(IPU_H2C_MB_ERROR);
     readReg(IPU_H2C_MB_IS);
