@@ -185,7 +185,7 @@ void go_loop(void)
             //readReg(IPU_C2H_MB_RDDATA);
             if (val == 0xABCDABCD) {
                 writeReg(IPU_SRAM_BASEADDR, 0x0);
-                for (uint32_t i = 4; i < 0x800; i+=4) {
+                for (uint32_t i = 4; i < 0x2000; i+=4) {
                     uint32_t sram_val = readReg(IPU_SRAM_BASEADDR+i);
                     writeReg(IPU_DDR_BASEADDR+i, sram_val);
                 }
