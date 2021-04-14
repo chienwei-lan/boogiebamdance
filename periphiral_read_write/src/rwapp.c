@@ -130,7 +130,7 @@ struct ert_admin_sq_cmd {
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
-  MB_PRINTF("Reading From Address 0x%lx value=0x%lx\n",addr,val);
+  //MB_PRINTF("Reading From Address 0x%lx value=0x%lx\n",addr,val);
   return val;
 }
 
@@ -184,6 +184,7 @@ void go_loop(void)
             uint32_t val = readReg(IPU_SRAM_BASEADDR);
             //readReg(IPU_C2H_MB_RDDATA);
             if (val == 0xABCDABCD) {
+                writeReg(IPU_SRAM_BASEADDR, 0x0);
                 for (uint32_t i = 4; i < 0x100; i+=4) {
                     uint32_t sram_val = readReg(IPU_SRAM_BASEADDR+i);
                     writeReg(IPU_DDR_BASEADDR+i, sram_val);
