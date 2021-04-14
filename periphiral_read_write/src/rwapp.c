@@ -214,6 +214,10 @@ void init_comm_channel(void) {
     writeReg(IPU_C2H_MB_RIT,  0x0);
     writeReg(IPU_C2H_MB_SIT,  0x0);
 
+    writeReg(IPU_H2C_MB_IE,   0x0);
+    writeReg(IPU_H2C_MB_RIT,  0x0);
+    writeReg(IPU_H2C_MB_SIT,  0x0);
+
 }
 
 int main()
@@ -242,6 +246,10 @@ int main()
     writeReg(IPU_H2C_MB_WRDATA, 0xAD);
 
 
+    uint32_t val = readReg(IPU_C2H_MB_STATUS);
+    MB_PRINTF("C2H status 0x%d\n", val);
+
+#if 0
     readReg(IPU_H2C_MB_STATUS);
     readReg(IPU_H2C_MB_ERROR);
     readReg(IPU_H2C_MB_IS);
@@ -253,6 +261,7 @@ int main()
     readReg(IPU_C2H_MB_IS);
     readReg(IPU_C2H_MB_IP);
     readReg(IPU_C2H_MB_CTRL);                    
+#endif
 #if 0
     //ACCESS C2H Mailbox
     MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");

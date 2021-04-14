@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
                     for (uint32_t i = 4; i < 0x1000; i+=4) {
                         uint32_t *val = (uint32_t *)(bit+i);
                         uint32_t dram_val = readReg(handle, IPU_DDR_BASEADDR+i);
-                        if (*val != dram_val)
+                        if (*val != dram_val)   
                             std::cout << std::hex << "dram " << dram_val << " sram " << *val << "data mismatch at index" << i << std::endl;
                     }
 
