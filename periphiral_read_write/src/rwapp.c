@@ -193,6 +193,8 @@ void go_loop(void)
 
                 val = readReg(IPU_H2C_MB_RDDATA);
                 MB_PRINTF("IPU_H2C_MB_RDDATA val 0x%x\n", val);
+                val = readReg(IPU_H2C_MB_STATUS);
+                MB_PRINTF("IPU_H2C_MB_STATUS val 0x%x\n", val);
 
                 writeReg(IPU_SRAM_BASEADDR, 0x0);
                 for (uint32_t i = 4; i < 0x1000; i+=4) {
