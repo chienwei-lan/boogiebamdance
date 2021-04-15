@@ -187,6 +187,13 @@ void go_loop(void)
             uint32_t val = readReg(IPU_SRAM_BASEADDR);
             //readReg(IPU_C2H_MB_RDDATA);
             if (val == 0xABCDABCD) {
+
+                while (readReg(IPU_C2H_MB_STATUS) & 0x1)
+                    continue;
+
+                val = readReg(IPU_H2C_MB_RDDATA);
+                MB_PRINTF("IPU_H2C_MB_RDDATA val 0x%x\n", val);
+
                 writeReg(IPU_SRAM_BASEADDR, 0x0);
                 for (uint32_t i = 4; i < 0x1000; i+=4) {
                     uint32_t sram_val = readReg(IPU_SRAM_BASEADDR+i);
@@ -209,7 +216,7 @@ void go_loop(void)
 }
 
 void init_comm_channel(void) {
-
+    uint32_t val;
 
     writeReg(IPU_H2C_MB_CTRL, 0x3);
     writeReg(IPU_C2H_MB_CTRL, 0x3);
@@ -225,7 +232,7 @@ void init_comm_channel(void) {
     writeReg(IPU_C2H_MB_RIT,  0xF);
     writeReg(IPU_C2H_MB_SIT,  0x0);
 
-    uint32_t val = readReg(IPU_C2H_MB_IS);
+    val = readReg(IPU_C2H_MB_IS);
     writeReg(IPU_C2H_MB_IS,  val);
     writeReg(IPU_C2H_MB_IE,  0x3);
 
@@ -255,11 +262,11 @@ int main()
     init_comm_channel();
 
     writeReg(IPU_C2H_MB_WRDATA, 0xCD);
-    writeReg(IPU_H2C_MB_WRDATA, 0xAD);
+    //writeReg(IPU_H2C_MB_WRDATA, 0xAD);
 
 
-    uint32_t val = readReg(IPU_C2H_MB_STATUS);
-    MB_PRINTF("C2H status 0x%d\n", val);
+    //uint32_t val = readReg(IPU_C2H_MB_STATUS);
+    //MB_PRINTF("C2H status 0x%d\n", val);
 
 #if 0
     readReg(IPU_H2C_MB_STATUS);

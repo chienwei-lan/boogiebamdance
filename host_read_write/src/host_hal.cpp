@@ -131,11 +131,10 @@ int main(int argc, char **argv) {
         usleep(100000);
     }
 
+    writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
 
     uint32_t haha = readReg(handle, IPU_C2H_MB_RDDATA);
     std::cout << "C2H RDDATA: " << haha << std::endl;
-    haha = readReg(handle, IPU_H2C_MB_RDDATA);
-    std::cout << "H2C RDDATA: " << haha << std::endl;
 
     haha = readReg(handle, IPU_C2H_MB_STATUS);
     std::cout << "C2H STATUS: " << haha << std::endl;
