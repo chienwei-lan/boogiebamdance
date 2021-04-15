@@ -188,7 +188,7 @@ void go_loop(void)
             //readReg(IPU_C2H_MB_RDDATA);
             if (val == 0xABCDABCD) {
 
-                while (readReg(IPU_C2H_MB_STATUS) & 0x1)
+                while (readReg(IPU_H2C_MB_STATUS) & 0x1)
                     continue;
 
                 val = readReg(IPU_H2C_MB_RDDATA);
