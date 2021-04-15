@@ -275,7 +275,7 @@ int main()
 
     init_comm_channel();
 
-    writeReg(IPU_C2H_MB_WRDATA, 0xCD);
+    //writeReg(IPU_C2H_MB_WRDATA, 0xCD);
     //writeReg(IPU_H2C_MB_WRDATA, 0xAD);
 
 
@@ -304,10 +304,8 @@ int main()
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
 #endif
-
+    scheduler_loop();
 
     cleanup_platform();
-
-    scheduler_loop();
     return 0;
 }
