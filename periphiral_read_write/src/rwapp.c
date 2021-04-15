@@ -179,42 +179,18 @@ void ipu_isr(void)
 
 void go_loop(void)
 {
-    uint32_t cnt = 0;
-
     while(1) {
-        if (cnt++ == 0x10000000) {
-            cnt = 0;
-            uint32_t val = readReg(IPU_SRAM_BASEADDR);
-            //readReg(IPU_C2H_MB_RDDATA);
-            if (val == 0xABCDABCD) {
 
-                while (readReg(IPU_H2C_MB_STATUS) & 0x1)
-                    continue;
+            while (readReg(IPU_H2C_MB_STATUS) & 0x1)
+                continue;
 
-                val = readReg(IPU_H2C_MB_RDDATA);
-                MB_PRINTF("IPU_H2C_MB_RDDATA val 0x%x\n", val);
-                val = readReg(IPU_H2C_MB_STATUS);
-                MB_PRINTF("IPU_H2C_MB_STATUS val 0x%x\n", val);
+            val = readReg(IPU_H2C_MB_RDDATA);
+            MB_PRINTF("IPU_H2C_MB_RDDATA val 0x%x\n", val);
+            val = readReg(IPU_H2C_MB_STATUS);
+            MB_PRINTF("IPU_H2C_MB_STATUS val 0x%x\n", val);
 
-                writeReg(IPU_SRAM_BASEADDR, 0x0);
-                for (uint32_t i = 4; i < 0x1000; i+=4) {
-                    uint32_t sram_val = readReg(IPU_SRAM_BASEADDR+i);
-                    writeReg(IPU_DDR_BASEADDR+i, 0x0);
-                    writeReg(IPU_DDR_BASEADDR+i, sram_val);
-                }
-                #if 0
-                readReg(IPU_H2C_MB_STATUS);
-                readReg(IPU_H2C_MB_ERROR);
-                readReg(IPU_H2C_MB_IS);
-                readReg(IPU_H2C_MB_IP);
-                readReg(IPU_H2C_MB_CTRL);
-                #endif
-                writeReg(IPU_DDR_BASEADDR, 0x12341234);
-                break;
-            }
-        }
+            break;
     }
-
 }
 
 void init_comm_channel(void) {
@@ -230,7 +206,7 @@ void init_comm_channel(void) {
     writeReg(IPU_H2C_MB_IE,   0x0);
     writeReg(IPU_H2C_MB_RIT,  0x0);
     writeReg(IPU_H2C_MB_SIT,  0x0);
-#else
+
     writeReg(IPU_C2H_MB_RIT,  0xF);
     writeReg(IPU_C2H_MB_SIT,  0x0);
 
@@ -270,19 +246,6 @@ int main()
     //uint32_t val = readReg(IPU_C2H_MB_STATUS);
     //MB_PRINTF("C2H status 0x%d\n", val);
 
-#if 0
-    readReg(IPU_H2C_MB_STATUS);
-    readReg(IPU_H2C_MB_ERROR);
-    readReg(IPU_H2C_MB_IS);
-    readReg(IPU_H2C_MB_IP);
-    readReg(IPU_H2C_MB_CTRL);
-
-    readReg(IPU_C2H_MB_STATUS);
-    readReg(IPU_C2H_MB_ERROR);
-    readReg(IPU_C2H_MB_IS);
-    readReg(IPU_C2H_MB_IP);
-    readReg(IPU_C2H_MB_CTRL);                    
-#endif
 #if 0
     //ACCESS C2H Mailbox
     MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");

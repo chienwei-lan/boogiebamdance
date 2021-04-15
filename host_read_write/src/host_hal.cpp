@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     }
     std::cout << "Finished loading xclbin " << bit << "size "<< size << std::endl;
 
-
+#if 0
     for (uint32_t i = 4; i < 0x1000; i+=4) {
         uint32_t *val = (uint32_t *)(bit+i);
         writeReg(handle, IPU_SRAM_BASEADDR+i,*val);
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
     readReg(handle, IPU_SRAM_BASEADDR);
     //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
-
+#endif
 
     while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
         std::cout << "go sleep " << std::endl;
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
     readReg(handle, IPU_H2C_MB_CTRL);
 #endif
 
-#if 1
+#if 0
     uint32_t cnt = 0;
     while (1) {
         if (cnt++ ==0x10000000) {
