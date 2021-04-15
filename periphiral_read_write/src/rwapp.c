@@ -161,6 +161,9 @@ void ipu_isr(void)
      MB_PRINTF("%s \n", __func__);
      uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
+
+     MB_PRINTF("intc_mask 0x%x \n", intc_mask);
+
      if (intc_mask & 0x1) {// host interrupt
           MB_PRINTF("SQ door bell rings, go to answer it\n");
           there_is_pending_cmd = 1;
@@ -210,7 +213,7 @@ void init_comm_channel(void) {
 
     writeReg(IPU_H2C_MB_CTRL, 0x3);
     writeReg(IPU_C2H_MB_CTRL, 0x3);
-
+#if 0
     writeReg(IPU_C2H_MB_IE,   0x0);
     writeReg(IPU_C2H_MB_RIT,  0x0);
     writeReg(IPU_C2H_MB_SIT,  0x0);
@@ -218,6 +221,23 @@ void init_comm_channel(void) {
     writeReg(IPU_H2C_MB_IE,   0x0);
     writeReg(IPU_H2C_MB_RIT,  0x0);
     writeReg(IPU_H2C_MB_SIT,  0x0);
+#else
+    writeReg(IPU_C2H_MB_RIT,  0xF);
+    writeReg(IPU_C2H_MB_SIT,  0x0);
+
+    uint32_t val = readReg(IPU_C2H_MB_IS);
+    writeReg(IPU_C2H_MB_IS,  val);
+    writeReg(IPU_C2H_MB_IE,  0x3);
+
+
+    writeReg(IPU_H2C_MB_RIT,  0xF);
+    writeReg(IPU_H2C_MB_SIT,  0x0);
+
+    val = readReg(IPU_H2C_MB_IS);
+    writeReg(IPU_H2C_MB_IS,  val);
+    writeReg(IPU_H2C_MB_IE,  0x3);
+
+#endif
 
 }
 
