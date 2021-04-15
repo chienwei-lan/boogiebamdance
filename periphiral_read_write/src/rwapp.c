@@ -179,6 +179,8 @@ void ipu_isr(void)
 
 void go_loop(void)
 {
+    uint32_t val;
+
     while(1) {
 
             while (readReg(IPU_H2C_MB_STATUS) & 0x1)
