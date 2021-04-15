@@ -175,23 +175,57 @@ void ipu_isr(void)
 
 
      writeReg(IPU_INTC_IAR_ADDR, intc_mask);
-} 
+}
 
-void go_loop(void)
+
+int32_t poll_c2h_channel(void)
 {
-    uint32_t val;
 
-    while(1) {
+    while (readReg(IPU_H2C_MB_STATUS) & 0x1)
+        return 1;
 
-            while (readReg(IPU_H2C_MB_STATUS) & 0x1)
-                continue;
+    return 0;
+}
 
-            val = readReg(IPU_H2C_MB_RDDATA);
-            MB_PRINTF("IPU_H2C_MB_RDDATA val 0x%x\n", val);
-            val = readReg(IPU_H2C_MB_STATUS);
-            MB_PRINTF("IPU_H2C_MB_STATUS val 0x%x\n", val);
 
-            break;
+uint32_t fetch_cmd(void)
+{
+    MB_PRINTF("=>%s \n", __func__);
+
+    return readReg(IPU_H2C_MB_RDDATA);
+}
+
+
+void submit_to_dpu(uint32_t slot_offset)
+{
+    MB_PRINTF("=>%s \n", __func__);
+
+    writeReg(IPU_AIE_BASEADDR,  0x1);
+}
+
+
+void complete_cmd(uint32_t slot_offset)
+{
+    MB_PRINTF("=>%s \n", __func__);
+
+    writeReg(IPU_C2H_MB_WRDATA, slot_offset);
+}
+
+
+void scheduler_loop(void)
+{
+    MB_PRINTF("%s \n", __func__);
+    while (1) {
+
+        while (poll_c2h_channel())
+            continue;
+
+        uint32_t slot_offset = fetch_cmd();
+    
+        submit_to_dpu(slot_offset);
+
+        complete_cmd(slot_offset);
+
     }
 }
 
@@ -274,6 +308,6 @@ int main()
 
     cleanup_platform();
 
-    go_loop();
+    scheduler_loop();
     return 0;
 }
