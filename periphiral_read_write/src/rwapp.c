@@ -198,6 +198,7 @@ void go_loop(void)
                 readReg(IPU_H2C_MB_CTRL);
                 #endif
                 writeReg(IPU_DDR_BASEADDR, 0x12341234);
+                break;
             }
         }
     }
