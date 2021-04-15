@@ -126,6 +126,12 @@ int main(int argc, char **argv) {
     //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
 
 
+    while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
+        std::cout << "go sleep " << std::endl;
+        usleep(100000);
+    }
+
+
     uint32_t haha = readReg(handle, IPU_C2H_MB_RDDATA);
     std::cout << "C2H RDDATA: " << haha << std::endl;
     haha = readReg(handle, IPU_H2C_MB_RDDATA);
