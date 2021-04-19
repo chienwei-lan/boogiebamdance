@@ -126,6 +126,7 @@ int main(int argc, char **argv) {
     //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
 #endif
     writeReg(handle, IPU_H2C_MB_WRDATA, 0x1000);
+    std::cout << std::hex << "H2C RDDATA: 0x1000" << std::endl;
 #if 0
     while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
         std::cout << "go sleep " << std::endl;
