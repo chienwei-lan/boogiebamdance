@@ -243,7 +243,7 @@ void init_comm_channel(void) {
     writeReg(IPU_H2C_MB_IE,   0x0);
     writeReg(IPU_H2C_MB_RIT,  0x0);
     writeReg(IPU_H2C_MB_SIT,  0x0);
-
+#endif
     writeReg(IPU_C2H_MB_RIT,  0xF);
     writeReg(IPU_C2H_MB_SIT,  0x0);
 
@@ -258,8 +258,6 @@ void init_comm_channel(void) {
     val = readReg(IPU_H2C_MB_IS);
     writeReg(IPU_H2C_MB_IS,  val);
     writeReg(IPU_H2C_MB_IE,  0x3);
-
-#endif
 
 }
 
