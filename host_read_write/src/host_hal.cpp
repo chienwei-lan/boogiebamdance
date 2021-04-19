@@ -137,14 +137,17 @@ int main(int argc, char **argv) {
 
     while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
         std::cout << "go sleep " << std::endl;
-        usleep(100000);
+        usleep(1000);
     }
 
     uint32_t haha = readReg(handle, IPU_C2H_MB_RDDATA);
-    std::cout << "C2H RDDATA: " << haha << std::endl;
+    std::cout << std::hex << "C2H RDDATA: " << haha << std::endl;
 
     haha = readReg(handle, IPU_C2H_MB_STATUS);
     std::cout << "C2H STATUS: " << haha << std::endl;
+
+
+    writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
 #if 0
     readReg(handle, IPU_H2C_MB_STATUS);
     readReg(handle, IPU_H2C_MB_ERROR);

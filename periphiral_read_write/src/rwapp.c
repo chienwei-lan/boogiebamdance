@@ -142,7 +142,7 @@ void writeReg(uint32_t addr,uint32_t value) {
 void init_interrupt(void)
 {
     MB_PRINTF("%s\n", __func__);
-    writeReg(IPU_INTC_MER_ADDR,0x1);
+    writeReg(IPU_INTC_MER_ADDR,0x3);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
     writeReg(IPU_INTC_ISR_ADDR,0x3);
@@ -158,7 +158,7 @@ void init_command_queue(void)
 
 void ipu_isr(void)
 {
-     MB_PRINTF("%s \n", __func__);
+     MB_PRINTF("=> %s \n", __func__);
      uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
 
@@ -178,7 +178,7 @@ void ipu_isr(void)
 }
 
 
-int32_t poll_c2h_channel(void)
+int32_t sq_tail_pointer_empty(void)
 {
 
     while (readReg(IPU_H2C_MB_STATUS) & 0x1)
@@ -190,7 +190,7 @@ int32_t poll_c2h_channel(void)
 
 uint32_t fetch_cmd(void)
 {
-    MB_PRINTF("=>%s \n", __func__);
+    MB_PRINTF(" => %s \n", __func__);
 
     return readReg(IPU_H2C_MB_RDDATA);
 }
@@ -198,7 +198,7 @@ uint32_t fetch_cmd(void)
 
 void submit_to_dpu(uint32_t slot_offset)
 {
-    MB_PRINTF("=>%s \n", __func__);
+    MB_PRINTF(" => %s \n", __func__);
 
     writeReg(IPU_AIE_BASEADDR,  0x1);
 }
@@ -206,7 +206,7 @@ void submit_to_dpu(uint32_t slot_offset)
 
 void complete_cmd(uint32_t slot_offset)
 {
-    MB_PRINTF("=>%s \n", __func__);
+    MB_PRINTF(" => %s \n", __func__);
 
     writeReg(IPU_C2H_MB_WRDATA, slot_offset);
 }
@@ -217,7 +217,7 @@ void scheduler_loop(void)
     MB_PRINTF("%s \n", __func__);
     while (1) {
 
-        while (poll_c2h_channel())
+        while (sq_tail_pointer_empty())
             continue;
 
         uint32_t slot_offset = fetch_cmd();
@@ -226,6 +226,7 @@ void scheduler_loop(void)
 
         complete_cmd(slot_offset);
 
+        break;
     }
 }
 
@@ -275,35 +276,6 @@ int main()
 
     init_comm_channel();
 
-    //writeReg(IPU_C2H_MB_WRDATA, 0xCD);
-    //writeReg(IPU_H2C_MB_WRDATA, 0xAD);
-
-
-    //uint32_t val = readReg(IPU_C2H_MB_STATUS);
-    //MB_PRINTF("C2H status 0x%d\n", val);
-
-#if 0
-    //ACCESS C2H Mailbox
-    MB_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
-    writeReg(IPU_C2HMAILBOX_BASEADDR,0x1);
-    readReg(IPU_C2HMAILBOX_BASEADDR);
-    //ACCESS H2C MailBox
-    MB_PRINTF("READ/WRITE TEST FOR H2CMAILBOX\n");
-    writeReg(IPU_H2CMAILBOX_BASEADDR,0x1);
-    readReg(IPU_H2CMAILBOX_BASEADDR);
-    //ACCESS STRM2AXI0
-    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
-    writeReg(IPU_STRM2AXI0_BASEADDR,0x1);
-    readReg(IPU_STRM2AXI0_BASEADDR);
-    //ACCESS STRM2AXI0
-    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
-    writeReg(IPU_STRM2AXI1_BASEADDR,0x1);
-    readReg(IPU_STRM2AXI1_BASEADDR);
-    //ACCESS STRM2AXI0
-    MB_PRINTF("READ/WRITE TEST FOR STRM2AXI0\n");
-    writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
-    readReg(IPU_STRM2AXI2_BASEADDR);
-#endif
     scheduler_loop();
 
     cleanup_platform();
