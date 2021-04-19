@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     std::cout << "C2H STATUS: " << haha << std::endl;
 
 
-    writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
+    //writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
 #if 0
     readReg(handle, IPU_H2C_MB_STATUS);
     readReg(handle, IPU_H2C_MB_ERROR);

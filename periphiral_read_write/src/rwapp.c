@@ -145,7 +145,7 @@ void init_interrupt(void)
     writeReg(IPU_INTC_MER_ADDR,0x3);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
-    writeReg(IPU_INTC_ISR_ADDR,0x3);
+    //writeReg(IPU_INTC_ISR_ADDR,0x3);
 
 }
 
@@ -212,13 +212,18 @@ void complete_cmd(uint32_t slot_offset)
 }
 
 
-void scheduler_loop(void)
+void scheduler_loop(void)   
 {
     MB_PRINTF("%s \n", __func__);
     while (1) {
 
         while (sq_tail_pointer_empty())
             continue;
+
+         uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
+
+
+         MB_PRINTF("intc_mask 0x%x \n", intc_mask);
 
         uint32_t slot_offset = fetch_cmd();
     
