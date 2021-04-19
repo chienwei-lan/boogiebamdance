@@ -220,10 +220,9 @@ void scheduler_loop(void)
         while (sq_tail_pointer_empty())
             continue;
 
-         uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
+        uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
-
-         MB_PRINTF("intc_mask 0x%x \n", intc_mask);
+        MB_PRINTF("intc_mask 0x%x \n", intc_mask);
 
         uint32_t slot_offset = fetch_cmd();
     
