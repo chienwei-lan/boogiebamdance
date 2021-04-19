@@ -233,8 +233,6 @@ void scheduler_loop(void)
 void init_comm_channel(void) {
     uint32_t val;
 
-    writeReg(IPU_H2C_MB_CTRL, 0x3);
-    writeReg(IPU_C2H_MB_CTRL, 0x3);
 #if 0
     writeReg(IPU_C2H_MB_IE,   0x0);
     writeReg(IPU_C2H_MB_RIT,  0x0);
@@ -251,7 +249,6 @@ void init_comm_channel(void) {
     writeReg(IPU_C2H_MB_IS,  val);
     writeReg(IPU_C2H_MB_IE,  0x3);
 
-
     writeReg(IPU_H2C_MB_RIT,  0xF);
     writeReg(IPU_H2C_MB_SIT,  0x0);
 
@@ -259,6 +256,9 @@ void init_comm_channel(void) {
     writeReg(IPU_H2C_MB_IS,  val);
     writeReg(IPU_H2C_MB_IE,  0x3);
 
+
+    writeReg(IPU_H2C_MB_CTRL, 0x3);
+    writeReg(IPU_C2H_MB_CTRL, 0x3);
 }
 
 int main()
