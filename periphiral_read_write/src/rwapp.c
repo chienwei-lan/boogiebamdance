@@ -95,8 +95,8 @@ static uint32_t sq_slot_size = 0x1000;
 static uint32_t cq_slot_size = 32;
 static uint32_t num_slots = 16;
 
-static uint32_t sq_offset = IPU_SRAM_BASEADDR;
-static uint32_t cq_offset = IPU_SRAM_BASEADDR + num_slot*sq_slot_size;
+static uint32_t sq_offset = 0;
+static uint32_t cq_offset = 0;
 
 
 #define MB_PRINTF(fmt, arg...)   \
@@ -155,9 +155,6 @@ struct ert_cq_cmd {
     };
 };
 
-
-static struct ert_sq_cmd sq_cmd_slots[max_slots];
-
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
@@ -207,6 +204,10 @@ void init_interrupt(void)
 void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
+
+
+    sq_offset = IPU_SRAM_BASEADDR;
+    cq_offset = IPU_SRAM_BASEADDR + num_slots*sq_slot_size;
 
     MB_PRINTF("SQ offset 0x%lx\n", sq_offset);
     MB_PRINTF("CQ offset 0x%lx\n", cq_offset);
