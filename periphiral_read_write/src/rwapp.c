@@ -161,8 +161,11 @@ void ipu_isr(void)
      MB_PRINTF("=> %s \n", __func__);
      uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
 
-
      MB_PRINTF("intc_mask 0x%x \n", intc_mask);
+
+
+     uint32_t ip = readReg(IPU_H2C_MB_IP);
+     MB_PRINTF("ip 0x%x \n", ip);
 
      if (intc_mask & 0x1) {// host interrupt
           MB_PRINTF("SQ door bell rings, go to answer it\n");
