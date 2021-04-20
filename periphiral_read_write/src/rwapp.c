@@ -267,8 +267,8 @@ void complete_cmd(uint32_t sq_slot_idx)
     writeReg(cq_offset+0x8, sq_slot_idx);
     writeReg(cq_offset+0xc, cmd_id);
 
-    while (readReg(IPU_C2H_MB_STATUS) & 0x1)
-        continue;
+    //while (readReg(IPU_C2H_MB_STATUS) & 0x1)
+    //    continue;
 
     writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
 
