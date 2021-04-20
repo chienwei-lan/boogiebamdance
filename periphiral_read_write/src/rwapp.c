@@ -82,7 +82,7 @@
 #define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
 
 static uint8_t there_is_pending_cmd = 0;
-
+static bool    tail_pointer_polling = false;
 
 #define MB_PRINTF(fmt, arg...)   \
         printf("[ Microblaze ]" fmt "\n", ##arg)
@@ -127,6 +127,19 @@ struct ert_admin_sq_cmd {
 
 }; 
 
+struct ert_cq_cmd {
+    uint32_t return_code;
+    uint32_t command_specific;
+    struct {
+        uint32_t sq_pointer:16;      /* [15-0]  */
+        uint32_t reserved:16;        /* [31-16] */
+    };
+    struct {
+        uint32_t cmd_identifier:16;  /* [15-0]  */
+        uint32_t cmd_state:16;       /* [31-16] */
+    };
+};
+
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
@@ -139,9 +152,34 @@ void writeReg(uint32_t addr,uint32_t value) {
   *((uint32_t*)(addr))=value;
 }
 
+void ipu_isr(void)
+{
+     MB_PRINTF("=> %s \n", __func__);
+     uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
+
+     MB_PRINTF("intc_mask 0x%lx \n", intc_mask);
+
+     if (intc_mask & 0x10) {// host interrupt
+          MB_PRINTF("SQ door bell rings, go to answer it\n");
+          there_is_pending_cmd = 1;
+
+     }
+
+     if (intc_mask & 0x2)
+        MB_PRINTF("DPU comes back\n");
+
+
+     writeReg(IPU_INTC_IAR_ADDR, intc_mask);
+}
+
 void init_interrupt(void)
 {
     MB_PRINTF("%s\n", __func__);
+
+    microblaze_register_handler((XInterruptHandler)ipu_isr, (void *) 0);
+
+    microblaze_enable_interrupts();
+
     writeReg(IPU_INTC_MER_ADDR,0x3);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
@@ -156,33 +194,13 @@ void init_command_queue(void)
 }
 
 
-void ipu_isr(void)
-{
-     MB_PRINTF("=> %s \n", __func__);
-     uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
-
-     MB_PRINTF("intc_mask 0x%lx \n", intc_mask);
-
-
-     if (intc_mask & 0x1) {// host interrupt
-          MB_PRINTF("SQ door bell rings, go to answer it\n");
-          there_is_pending_cmd = 1;
-
-     }
-
-     if (intc_mask & 0x2)
-        MB_PRINTF("DPU comes back\n");
-
-
-     writeReg(IPU_INTC_IAR_ADDR, intc_mask);
-}
-
-
 int32_t sq_tail_pointer_empty(void)
 {
 
-    while (readReg(IPU_H2C_MB_STATUS) & 0x1)
+    while (!there_is_pending_cmd)
         return 1;
+
+    there_is_pending_cmd = 0;
 
     return 0;
 }
@@ -191,6 +209,9 @@ int32_t sq_tail_pointer_empty(void)
 uint32_t fetch_cmd(void)
 {
     MB_PRINTF(" => %s \n", __func__);
+
+    while (readReg(IPU_H2C_MB_STATUS) & 0x1)
+        continue;
 
     return readReg(IPU_H2C_MB_RDDATA);
 }
@@ -220,13 +241,6 @@ void scheduler_loop(void)
         while (sq_tail_pointer_empty())
             continue;
 
-        uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
-
-        MB_PRINTF("intc_mask 0x%lx \n", intc_mask);
-
-        uint32_t ip = readReg(IPU_H2C_MB_IP);
-        MB_PRINTF("haha ip 0x%lx \n", ip);
-
         uint32_t slot_offset = fetch_cmd();
     
         submit_to_dpu(slot_offset);
@@ -240,29 +254,30 @@ void scheduler_loop(void)
 void init_comm_channel(void) {
     uint32_t val;
 
-#if 0
-    writeReg(IPU_C2H_MB_IE,   0x0);
-    writeReg(IPU_C2H_MB_RIT,  0x0);
-    writeReg(IPU_C2H_MB_SIT,  0x0);
+    if (tail_pointer_polling) {
+        writeReg(IPU_C2H_MB_IE,   0x0);
+        writeReg(IPU_C2H_MB_RIT,  0x0);
+        writeReg(IPU_C2H_MB_SIT,  0x0);
 
-    writeReg(IPU_H2C_MB_IE,   0x0);
-    writeReg(IPU_H2C_MB_RIT,  0x0);
-    writeReg(IPU_H2C_MB_SIT,  0x0);
-#endif
-    writeReg(IPU_C2H_MB_RIT,  0x0);
-    writeReg(IPU_C2H_MB_SIT,  0x0);
+        writeReg(IPU_H2C_MB_IE,   0x0);
+        writeReg(IPU_H2C_MB_RIT,  0x0);
+        writeReg(IPU_H2C_MB_SIT,  0x0);
+    } else {
+        writeReg(IPU_C2H_MB_RIT,  0x0);
+        writeReg(IPU_C2H_MB_SIT,  0x0);
 
-    val = readReg(IPU_C2H_MB_IS);
-    writeReg(IPU_C2H_MB_IS,  val);
-    writeReg(IPU_C2H_MB_IE,  0x3);
+        val = readReg(IPU_C2H_MB_IS);
+        writeReg(IPU_C2H_MB_IS,  val);
+        writeReg(IPU_C2H_MB_IE,  0x3);
 
-    writeReg(IPU_H2C_MB_RIT,  0x0);
-    writeReg(IPU_H2C_MB_SIT,  0x0);
+        writeReg(IPU_H2C_MB_RIT,  0x0);
+        writeReg(IPU_H2C_MB_SIT,  0x0);
 
-    val = readReg(IPU_H2C_MB_IS);
-    writeReg(IPU_H2C_MB_IS,  val);
-    writeReg(IPU_H2C_MB_IE,  0x3);
+        val = readReg(IPU_H2C_MB_IS);
+        writeReg(IPU_H2C_MB_IS,  val);
+        writeReg(IPU_H2C_MB_IE,  0x3);
 
+    }
 
     writeReg(IPU_H2C_MB_CTRL, 0x3);
     writeReg(IPU_C2H_MB_CTRL, 0x3);
@@ -273,9 +288,6 @@ int main()
     init_platform();
 
     init_command_queue();
-
-    microblaze_register_handler((XInterruptHandler)ipu_isr, (void *) 0);
-    microblaze_enable_interrupts();
 
     init_interrupt();
 
