@@ -81,8 +81,23 @@
 #define IPU_C2H_MB_IP                     (IPU_C2HMAILBOX_BASEADDR+0x28)   /* interrupt pending */
 #define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
 
+
+const uint32_t  max_slots = 16;
+
+
 static uint8_t there_is_pending_cmd = 0;
-static bool    tail_pointer_polling = false;
+static uint8_t tail_pointer_polling = 0;
+
+static uint16_t sq_tail_pointer = 0;
+static uint16_t cq_tail_pointer = 0;
+
+static uint32_t sq_slot_size = 0x1000;
+static uint32_t cq_slot_size = 32;
+static uint32_t num_slots = 16;
+
+static uint32_t sq_offset = IPU_SRAM_BASEADDR;
+static uint32_t cq_offset = IPU_SRAM_BASEADDR + num_slot*sq_slot_size;
+
 
 #define MB_PRINTF(fmt, arg...)   \
         printf("[ Microblaze ]" fmt "\n", ##arg)
@@ -140,6 +155,9 @@ struct ert_cq_cmd {
     };
 };
 
+
+static struct ert_sq_cmd sq_cmd_slots[max_slots];
+
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
 	val=*((uint32_t*)(addr));
@@ -183,14 +201,15 @@ void init_interrupt(void)
     writeReg(IPU_INTC_MER_ADDR,0x3);
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
-    //writeReg(IPU_INTC_ISR_ADDR,0x3);
-
 }
 
 
 void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
+
+    MB_PRINTF("SQ offset 0x%lx\n", sq_offset);
+    MB_PRINTF("CQ offset 0x%lx\n", cq_offset);
 }
 
 
@@ -217,19 +236,40 @@ uint32_t fetch_cmd(void)
 }
 
 
-void submit_to_dpu(uint32_t slot_offset)
+void submit_to_dpu(uint32_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
+
+    uint32_t sq_slot_offset = sq_slot_idx*sq_slot_size;
+
+    MB_PRINTF("0x%lx = 0x%lx \n", sq_slot_offset, readReg(sq_slot_offset));
+    MB_PRINTF("0x%lx = 0x%lx \n", sq_slot_offset+4, readReg(sq_slot_offset+4));
 
     writeReg(IPU_AIE_BASEADDR,  0x1);
 }
 
+uint32_t command_id(uint32_t sq_slot_offset)
+{
+    return readReg(sq_slot_offset+0x4);
+}
 
-void complete_cmd(uint32_t slot_offset)
+void complete_cmd(uint32_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
 
-    writeReg(IPU_C2H_MB_WRDATA, slot_offset);
+    uint32_t sq_slot_offset = sq_slot_idx*sq_slot_size;
+
+    uint32_t cmd_id = command_id(sq_slot_offset);
+
+    writeReg(cq_offset+0x0, 0x0);
+    writeReg(cq_offset+0x8, sq_slot_idx);
+    writeReg(cq_offset+0xc, cmd_id);
+
+    while (readReg(IPU_C2H_MB_STATUS) & 0x1)
+        continue;
+
+    writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
+
 }
 
 
@@ -241,11 +281,11 @@ void scheduler_loop(void)
         while (sq_tail_pointer_empty())
             continue;
 
-        uint32_t slot_offset = fetch_cmd();
+        uint32_t sq_slot_idx = fetch_cmd();
     
-        submit_to_dpu(slot_offset);
+        submit_to_dpu(sq_slot_idx);
 
-        complete_cmd(slot_offset);
+        complete_cmd(sq_slot_idx);
 
         break;
     }
