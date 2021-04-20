@@ -152,6 +152,10 @@ int main(int argc, char **argv) {
     haha = readReg(handle, IPU_C2H_MB_STATUS);
     std::cout << "C2H STATUS: " << haha << std::endl;
 
+    std::cout << "0x0: " << readReg(handle, IPU_SRAM_BASEADDR+0x10000) << std::endl;
+    std::cout << "0x4: " << readReg(handle, IPU_SRAM_BASEADDR+0x10004) << std::endl;
+    std::cout << "0x8: " << readReg(handle, IPU_SRAM_BASEADDR+0x10008) << std::endl;
+    std::cout << "0xc: " << readReg(handle, IPU_SRAM_BASEADDR+0x1000c) << std::endl;
 
     //writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
 #if 0
