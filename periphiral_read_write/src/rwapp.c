@@ -258,7 +258,8 @@ void complete_cmd(uint32_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
 
-    uint32_t sq_slot_offset = sq_slot_idx*sq_slot_size;
+    uint32_t sq_slot_offset = sq_offset + sq_slot_idx*sq_slot_size;
+    uint32_t cq_slot_offset = cq_offset + cq_tail_pointer*cq_slot_size;
 
     uint32_t cmd_id = command_id(sq_slot_offset);
 

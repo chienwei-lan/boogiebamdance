@@ -125,8 +125,13 @@ int main(int argc, char **argv) {
     readReg(handle, IPU_SRAM_BASEADDR);
     //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
 #endif
-    writeReg(handle, IPU_H2C_MB_WRDATA, 0x1000);
-    std::cout << std::hex << "H2C RDDATA: 0x1000" << std::endl;
+    writeReg(handle, IPU_SRAM_BASEADDR,     0x0);
+    writeReg(handle, IPU_SRAM_BASEADDR+0x4, 0x1234ABCD);
+    writeReg(handle, IPU_SRAM_BASEADDR+0x8, 0xDEADFA11);
+    writeReg(handle, IPU_SRAM_BASEADDR+0xC, 0xBEEFBEEF);
+
+    writeReg(handle, IPU_H2C_MB_WRDATA, 0x0);
+    std::cout << std::hex << "H2C RDDATA: 0x0" << std::endl;
 #if 0
     while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
         std::cout << "go sleep " << std::endl;
