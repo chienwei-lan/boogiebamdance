@@ -205,6 +205,11 @@ void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
 
+    for (uint32_t offset = 0x1000; offset < 0x80000; offset <= 1) {
+
+           writeReg(IPU_SRAM_BASEADDR+offset,offset);
+           MB_PRINTF("offset 0x%lx, value 0x%lx\n", offset, readReg(IPU_SRAM_BASEADDR+offset));
+    }
 
     sq_offset = IPU_SRAM_BASEADDR;
     cq_offset = IPU_SRAM_BASEADDR + num_slots*sq_slot_size;
