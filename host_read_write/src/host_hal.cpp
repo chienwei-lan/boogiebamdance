@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
     for (uint32_t offset = 0x1000; offset < 0x80000; offset <<= 1) {
 
            writeReg(handle, IPU_SRAM_BASEADDR+offset,offset);
-           std::cout << "offset 0x" <<  offset << "val: " << readReg(handle, IPU_SRAM_BASEADDR+offset) << std::endl;
+           std::cout << std::hex << "offset 0x" <<  offset << "val: " << readReg(handle, IPU_SRAM_BASEADDR+offset) << std::endl;
 
     }
 
