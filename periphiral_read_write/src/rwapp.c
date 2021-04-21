@@ -257,7 +257,7 @@ void submit_to_dpu(uint32_t sq_slot_idx)
 
 uint32_t command_id(uint32_t sq_slot_offset)
 {
-    return readReg(sq_slot_offset+0x4);
+    return readReg(sq_slot_offset+0x4) & 0xFFFF;
 }
 
 void complete_cmd(uint32_t sq_slot_idx)
