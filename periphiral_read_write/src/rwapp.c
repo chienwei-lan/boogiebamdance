@@ -88,12 +88,18 @@ const uint32_t  max_slots = 16;
 static uint8_t there_is_pending_cmd = 0;
 static uint8_t tail_pointer_polling = 0;
 
-static uint16_t sq_tail_pointer = 0;
 static uint16_t cq_tail_pointer = 0;
 
-static uint32_t sq_slot_size = 0x1000;
-static uint32_t cq_slot_size = 32;
-static uint32_t num_slots = 4;
+static uint32_t sq_slot_size = 512;
+static uint32_t cq_slot_size = 16;
+
+static uint16_t sq_num_slots = 4;
+static uint16_t cq_num_slots = 4;
+
+static uint32_t sq_slot_mask = sq_num_slots-1;
+static uint32_t cq_slot_mask = cq_num_slots-1;
+
+static uint32_t num_cus = 1;
 
 static uint32_t sq_offset = 0;
 static uint32_t cq_offset = 0;
@@ -205,15 +211,27 @@ void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
     uint32_t offset = 0;
-#if 0
-    for (offset = 0x1000; offset < 0x80000; offset <<= 1) {
 
-           writeReg(IPU_SRAM_BASEADDR+offset,offset);
-           MB_PRINTF("offset 0x%lx, value 0x%lx\n", offset, readReg(IPU_SRAM_BASEADDR+offset));
-    }
-#endif
+
+    sq_slot_size = 512;
+    cq_slot_size = 16;
+
+    sq_num_slots = 4;
+    cq_num_slots = 4;
+
+    sq_slot_mask = sq_num_slots-1;
+    cq_slot_mask = cq_num_slots-1;
+
+
     sq_offset = IPU_SRAM_BASEADDR;
     cq_offset = IPU_SRAM_BASEADDR + num_slots*sq_slot_size;
+
+    MB_PRINTF("sq_slot_size 0x%lx\n", sq_slot_size);
+    MB_PRINTF("cq_slot_size 0x%lx\n", cq_slot_size);
+    MB_PRINTF("sq_num_slots %d\n", sq_num_slots);
+    MB_PRINTF("cq_num_slots %d\n", cq_num_slots);
+    MB_PRINTF("sq_slot_mask 0x%lx\n", sq_slot_mask);
+    MB_PRINTF("cq_slot_mask 0x%lx\n", cq_slot_mask);
 
     MB_PRINTF("SQ offset 0x%lx\n", sq_offset);
     MB_PRINTF("CQ offset 0x%lx\n", cq_offset);
@@ -232,14 +250,14 @@ int32_t sq_tail_pointer_empty(void)
 }
 
 
-uint32_t fetch_cmd(void)
+uint32_t fetch_sq_tail(void)
 {
     MB_PRINTF(" => %s \n", __func__);
 
     while (readReg(IPU_H2C_MB_STATUS) & 0x1)
         continue;
 
-    return readReg(IPU_H2C_MB_RDDATA);
+    return readReg(IPU_H2C_MB_RDDATA) & sq_slot_mask;
 }
 
 
@@ -289,7 +307,7 @@ void scheduler_loop(void)
         while (sq_tail_pointer_empty())
             continue;
 
-        uint32_t sq_slot_idx = fetch_cmd();
+        uint32_t sq_slot_idx = fetch_sq_tail();
     
         submit_to_dpu(sq_slot_idx);
 
