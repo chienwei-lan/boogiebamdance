@@ -204,8 +204,9 @@ void init_interrupt(void)
 void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
+    uint32_t offset = 0;
 
-    for (uint32_t offset = 0x1000; offset < 0x80000; offset <= 1) {
+    for (offset = 0x1000; offset < 0x80000; offset <<= 1) {
 
            writeReg(IPU_SRAM_BASEADDR+offset,offset);
            MB_PRINTF("offset 0x%lx, value 0x%lx\n", offset, readReg(IPU_SRAM_BASEADDR+offset));
