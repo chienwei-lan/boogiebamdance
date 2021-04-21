@@ -129,14 +129,14 @@ int main(int argc, char **argv) {
     writeReg(handle, IPU_SRAM_BASEADDR+0x4, 0x1234ABCD);
     writeReg(handle, IPU_SRAM_BASEADDR+0x8, 0xDEADFA11);
     writeReg(handle, IPU_SRAM_BASEADDR+0xC, 0xBEEFBEEF);
-
+#if 0
     for (uint32_t offset = 0x1000; offset < 0x80000; offset <<= 1) {
 
            writeReg(handle, IPU_SRAM_BASEADDR+offset,offset);
            std::cout << std::hex << "offset 0x" <<  offset << "val: " << readReg(handle, IPU_SRAM_BASEADDR+offset) << std::endl;
 
     }
-
+#endif
     writeReg(handle, IPU_H2C_MB_WRDATA, 0x0);
     std::cout << std::hex << "H2C RDDATA: 0x0" << std::endl;
 #if 0

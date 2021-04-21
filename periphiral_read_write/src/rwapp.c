@@ -93,7 +93,7 @@ static uint16_t cq_tail_pointer = 0;
 
 static uint32_t sq_slot_size = 0x1000;
 static uint32_t cq_slot_size = 32;
-static uint32_t num_slots = 16;
+static uint32_t num_slots = 4;
 
 static uint32_t sq_offset = 0;
 static uint32_t cq_offset = 0;
@@ -205,13 +205,13 @@ void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
     uint32_t offset = 0;
-
+#if 0
     for (offset = 0x1000; offset < 0x80000; offset <<= 1) {
 
            writeReg(IPU_SRAM_BASEADDR+offset,offset);
            MB_PRINTF("offset 0x%lx, value 0x%lx\n", offset, readReg(IPU_SRAM_BASEADDR+offset));
     }
-
+#endif
     sq_offset = IPU_SRAM_BASEADDR;
     cq_offset = IPU_SRAM_BASEADDR + num_slots*sq_slot_size;
 
