@@ -248,7 +248,7 @@ int32_t sq_tail_pointer_empty(void)
 inline static uint16_t fetch_sq(void)
 {
     MB_PRINTF(" => %s \n", __func__);
-    uint32_t val;
+    uint16_t val;
 
     while (readReg(IPU_H2C_MB_STATUS) & 0x1)
         continue;
