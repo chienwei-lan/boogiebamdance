@@ -33,41 +33,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "xclhal2.h"
 #include "xclbin.h"
+#include "ert.h"
 
 using namespace std;
 #include "ipu_platform_host.h"
-
-
-#define IPU_H2C_MB_WRDATA                 (IPU_H2CMAILBOX_BASEADDR)        /* write data */
-#define IPU_H2C_MB_RDDATA                 (IPU_H2CMAILBOX_BASEADDR+0x8)    /* read data */
-#define IPU_H2C_MB_STATUS                 (IPU_H2CMAILBOX_BASEADDR+0x10)   /* status */
-#define IPU_H2C_MB_ERROR                  (IPU_H2CMAILBOX_BASEADDR+0x14)   /* error */
-#define IPU_H2C_MB_SIT                    (IPU_H2CMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
-#define IPU_H2C_MB_RIT                    (IPU_H2CMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
-#define IPU_H2C_MB_IS                     (IPU_H2CMAILBOX_BASEADDR+0x20)   /* interrupt status */
-#define IPU_H2C_MB_IE                     (IPU_H2CMAILBOX_BASEADDR+0x24)   /* error */
-#define IPU_H2C_MB_IP                     (IPU_H2CMAILBOX_BASEADDR+0x28)   /* interrupt pending */
-#define IPU_H2C_MB_CTRL                   (IPU_H2CMAILBOX_BASEADDR+0x2C)   /* control */
-
-#define IPU_C2H_MB_WRDATA                 (IPU_C2HMAILBOX_BASEADDR)        /* write data */
-#define IPU_C2H_MB_RDDATA                 (IPU_C2HMAILBOX_BASEADDR+0x8)    /* read data */
-#define IPU_C2H_MB_STATUS                 (IPU_C2HMAILBOX_BASEADDR+0x10)   /* status */
-#define IPU_C2H_MB_ERROR                  (IPU_C2HMAILBOX_BASEADDR+0x14)   /* error */
-#define IPU_C2H_MB_SIT                    (IPU_C2HMAILBOX_BASEADDR+0x18)   /* set interrupt threshold */
-#define IPU_C2H_MB_RIT                    (IPU_C2HMAILBOX_BASEADDR+0x1C)   /* receive interrupt threshold */
-#define IPU_C2H_MB_IS                     (IPU_C2HMAILBOX_BASEADDR+0x20)   /* interrupt status */
-#define IPU_C2H_MB_IE                     (IPU_C2HMAILBOX_BASEADDR+0x24)   /* error */
-#define IPU_C2H_MB_IP                     (IPU_C2HMAILBOX_BASEADDR+0x28)   /* interrupt pending */
-#define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
-
-#define FLAG_STI                          (1 << 0)
-#define FLAG_RTI                          (1 << 1)
-
-#define STATUS_EMPTY                      (1 << 0)
-#define STATUS_FULL                       (1 << 1)
-#define STATUS_STA                        (1 << 2)
-#define STATUS_RTA                        (1 << 3)
-
+#include "xrt_queue_host.h"
+#include "xrt_queue.h"
+#include "xrt_proxy.h"
 
 uint32_t readReg(xclDeviceHandle& handle, uint32_t addr) 
 {
@@ -77,11 +49,12 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
   return value;
 }
 
-void writeReg(xclDeviceHandle& handle, uint32_t addr,uint32_t value) 
+void writeReg(xclDeviceHandle& handle, uint32_t addr, uint32_t value) 
 {
 	//printf("Writing to Address 0x%x value=0x%x\n",addr,value);
     xclWrite(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
 }
+
 
 ////////MAIN FUNCTION//////////
 int main(int argc, char **argv) {
@@ -93,7 +66,7 @@ int main(int argc, char **argv) {
     std::string binaryFile = argv[1];
 
     //! Create device handle
-    xclDeviceHandle handle;
+    xclDeviceHandle handle; 
     handle = xclOpen(0, NULL, XCL_INFO);
 
     //! Load xclbin
@@ -111,107 +84,70 @@ int main(int argc, char **argv) {
         delete[] header;
         throw runtime_error("load xclbin failed");
     }
-    std::cout << "Finished loading xclbin " << bit << "size "<< size << std::endl;
+    std::cout << "Finished loading xclbin " << bit << std::endl;
 
-#if 0
-    for (uint32_t i = 4; i < 0x1000; i+=4) {
-        uint32_t *val = (uint32_t *)(bit+i);
-        writeReg(handle, IPU_SRAM_BASEADDR+i,*val);
-    }
-
-    //RW to SRAM
-    //printf("READ/WRITE TEST FOR SRAM\n");
-    writeReg(handle, IPU_SRAM_BASEADDR,0xABCDABCD);
-    readReg(handle, IPU_SRAM_BASEADDR);
-    //writeReg(handle, IPU_H2C_MB_WRDATA,0xEF);
-#endif
-    writeReg(handle, IPU_SRAM_BASEADDR,     0x0);
-    writeReg(handle, IPU_SRAM_BASEADDR+0x4, 0x1234ABCD);
-    writeReg(handle, IPU_SRAM_BASEADDR+0x8, 0xDEADFA11);
-    writeReg(handle, IPU_SRAM_BASEADDR+0xC, 0xBEEFBEEF);
-#if 0
-    for (uint32_t offset = 0x1000; offset < 0x80000; offset <<= 1) {
-
-           writeReg(handle, IPU_SRAM_BASEADDR+offset,offset);
-           std::cout << std::hex << "offset 0x" <<  offset << "val: " << readReg(handle, IPU_SRAM_BASEADDR+offset) << std::endl;
-
-    }
-#endif
-    writeReg(handle, IPU_H2C_MB_WRDATA, 0x0);
-    std::cout << std::hex << "H2C RDDATA: 0x0" << std::endl;
-#if 0
-    while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
-        std::cout << "go sleep " << std::endl;
-        usleep(100000);
-    }
-
-    writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
-#endif
-
-    while (readReg(handle, IPU_C2H_MB_STATUS) & 0x1) {
-        std::cout << "go sleep " << std::endl;
-        usleep(1000);
-    }
-
-    uint32_t haha = readReg(handle, IPU_C2H_MB_RDDATA);
-    std::cout << std::hex << "C2H RDDATA: " << haha << std::endl;
-
-    haha = readReg(handle, IPU_C2H_MB_STATUS);
-    std::cout << "C2H STATUS: " << haha << std::endl;
-
-    std::cout << "0x0: " << readReg(handle, IPU_SRAM_BASEADDR+0x4000) << std::endl;
-    std::cout << "0x4: " << readReg(handle, IPU_SRAM_BASEADDR+0x4004) << std::endl;
-    std::cout << "0x8: " << readReg(handle, IPU_SRAM_BASEADDR+0x4008) << std::endl;
-    std::cout << "0xc: " << readReg(handle, IPU_SRAM_BASEADDR+0x400c) << std::endl;
-
-    //writeReg(handle, IPU_H2C_MB_WRDATA, 0xEF);
-#if 0
-    readReg(handle, IPU_H2C_MB_STATUS);
-    readReg(handle, IPU_H2C_MB_ERROR);
-    readReg(handle, IPU_H2C_MB_IS);
-    readReg(handle, IPU_H2C_MB_IP);
-    readReg(handle, IPU_H2C_MB_CTRL);
-#endif
-
-#if 0
-    uint32_t cnt = 0;
-    while (1) {
-        if (cnt++ ==0x10000000) {
-            uint32_t val = readReg(handle, IPU_DDR_BASEADDR);
-            cnt = 0;
-            if (val == 0x12341234) {
-                    for (uint32_t i = 4; i < 0x1000; i+=4) {
-                        uint32_t *val = (uint32_t *)(bit+i);
-                        uint32_t dram_val = readReg(handle, IPU_DDR_BASEADDR+i);
-                        if (*val != dram_val)   
-                            std::cout << std::hex << "dram " << dram_val << " sram " << *val << "data mismatch at index" << i << std::endl;
-                    }
-
-                    std::cout << "Datat integratity PASSED" << std::endl;
-                break;
-            }
-        }
-
-
-
-    }
-#endif
-#if 0
     //RW to DDR
-    printf("READ/WRITE TEST FOR DDR\n");
-    writeReg(handle, IPU_DDR_BASEADDR,0x1);
-    readReg(handle, IPU_DDR_BASEADDR);
-    //ACCESS C2H Mailbox
-    printf("READ/WRITE TEST FOR C2HMAILBOX\n");
-    writeReg(handle, IPU_C2HMAILBOX_BASEADDR,0x1);
-    readReg(handle, IPU_C2HMAILBOX_BASEADDR);
-    //ACCESS H2C MailBox
-    printf("READ/WRITE TEST FOR H2CMAILBOX\n");
-    writeReg(handle, IPU_H2CMAILBOX_BASEADDR,0x1);
-    readReg(handle, IPU_H2CMAILBOX_BASEADDR);
-#endif
-    std::cout << "finished execution" << std::endl;
+    printf("READ/WRITE TEST FOR SRAM\n");
+    //writeReg(handle, IPU_SRAM_BASEADDR,0x1);
+    //readReg(handle, IPU_SRAM_BASEADDR);
 
-    return 0; 
+    printf("READ/WRITE TEST FOR DDR\n");
+    //writeReg(handle, IPU_DDR_BASEADDR,0x1);
+    //readReg(handle, IPU_DDR_BASEADDR);
+    //ACCESS C2H Mailbox
+    //printf("READ/WRITE TEST FOR C2HMAILBOX\n");
+    //writeReg(handle, IPU_C2HMAILBOX_BASEADDR,0x1);
+    //readReg(handle, IPU_C2HMAILBOX_BASEADDR);
+    //ACCESS H2C MailBox
+    //printf("READ/WRITE TEST FOR H2CMAILBOX\n");
+    //writeReg(handle, IPU_H2CMAILBOX_BASEADDR,0x1);
+    //readReg(handle, IPU_H2CMAILBOX_BASEADDR);
+
+    std::cout << "finished execution" << std::endl;
+#if 1
+    //printf("__larry_app: before alloc BO\n");
+    unsigned int boHdl = xp_xclAllocBO(handle, 4096, 0, 0);
+    std::cout << "data bo handler is " << boHdl << std::endl;
+
+    char *boMap = (char *)xp_xclMapBO(handle, boHdl, 1);
+    std::cout << "data bo vaddr is " << reinterpret_cast<uint64_t>(boMap) << std::endl;
+    xclBOProperties boProp;
+    xp_xclGetBOProperties(handle, boHdl, &boProp);
+    uint32_t boPAddr = boProp.paddr;
+    std::cout << "data bo paddr is " << boPAddr << std::endl;
+
+    unsigned int cmdBoHdl = xp_xclAllocBO(handle, XRT_SUB_Q1_SLOT_SIZE, 0, XCL_BO_FLAGS_EXECBUF);
+    std::cout << "cmd bo handler is " << boHdl << std::endl;
+    void *cmdBoMap = xp_xclMapBO(handle, cmdBoHdl, 1);
+    std::cout << "cmd bo vaddr is " << reinterpret_cast<uint64_t>(boMap) << std::endl;
+
+    struct xrt_cmd_start_cu *cmdp = reinterpret_cast<xrt_cmd_start_cu *>(cmdBoMap);
+    cmdp->state = ERT_CMD_STATE_NEW;
+    cmdp->opcode = XRT_CMD_OP_START_CU;
+    cmdp->count = 6;
+    cmdp->cid = 0x55aa; 	// use this as a magic number
+    cmdp->cu_mask = 1;
+    cmdp->data[0] = boPAddr;	// 32 bits BO address
+    cmdp->data[1] = 4096;	// size
+
+    xp_xclExecBuf(handle, cmdBoHdl);
+    xp_xclExecWait(handle, 0);
+
+    char host_empty_buf[16] = {0};
+
+    xp_xclSyncBO(handle, boHdl, XCL_BO_SYNC_BO_FROM_DEVICE, 4096, 0);
+    std::string outString(boMap);
+    std::cout << "Output string is: " << outString << std::endl;
+
+    usleep(2000000);
+    xp_xclExecBuf(handle, cmdBoHdl);
+    xp_xclExecWait(handle, 0);
+
+    std::string emptystring(boMap);
+    std::cout << "Output string is: " << emptystring << std::endl;    
+    xp_xclFreeBO(handle, boHdl);
+    xp_xclFreeBO(handle, cmdBoHdl);
+#endif
+    return 0;
 }
 

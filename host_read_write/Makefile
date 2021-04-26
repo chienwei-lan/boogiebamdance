@@ -14,6 +14,7 @@ CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++11
 LDFLAGS += $(opencl_LDFLAGS)
 
 HOST_SRCS += src/host_hal.cpp
+HOST_SRCS += src/xrt_proxy.cpp
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0

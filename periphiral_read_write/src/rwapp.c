@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2009 - 2014 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2009 - 2021 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,7 @@
 #include "platform.h"
 #include "xil_printf.h"
 #include "ipu_platform_uc.h"
+#include "xrt_queue.h"
 
 #define IPU_INTC_ISR_ADDR                 (IPU_INTC_BASEADDR)        /* status */
 #define IPU_INTC_IPR_ADDR                 (IPU_INTC_BASEADDR + 0x4)  /* pending */
@@ -82,24 +83,21 @@
 #define IPU_C2H_MB_CTRL                   (IPU_C2HMAILBOX_BASEADDR+0x2C)   /* control */
 
 
-const uint32_t  max_slots = 16;
-
+const uint32_t max_slots = 16;
 
 static uint8_t there_is_pending_cmd = 0;
 static uint8_t tail_pointer_polling = 0;
 
 static uint16_t cq_tail_pointer = 0;
 
-static uint32_t sq_slot_size = 512;
-static uint32_t cq_slot_size = 16;
+static uint32_t sq_slot_size = XRT_SUB_Q1_SLOT_SIZE;
+static uint32_t cq_slot_size = XRT_COM_Q1_SLOT_SIZE;
 
-static uint16_t sq_num_slots = 4;
-static uint16_t cq_num_slots = 4;
+static uint16_t sq_num_slots = XRT_QUEUE1_SLOT_NUM;
+static uint16_t cq_num_slots = XRT_QUEUE1_SLOT_NUM;
 
-static uint32_t sq_slot_mask = sq_num_slots-1;
-static uint32_t cq_slot_mask = cq_num_slots-1;
-
-static uint32_t num_cus = 1;
+static uint32_t sq_slot_mask = 3;
+static uint32_t cq_slot_mask = 3;
 
 static uint32_t sq_offset = 0;
 static uint32_t cq_offset = 0;
@@ -108,58 +106,57 @@ static uint32_t cq_offset = 0;
 #define MB_PRINTF(fmt, arg...)   \
         printf("[ Microblaze ]" fmt "\n", ##arg)
 
-struct ert_sq_cmd {
-  union {
-    struct {
-      uint32_t state:4;   /* [3-0]   */
-      uint32_t custom:8;  /* [11-4]  */
-      uint32_t count:11;  /* [22-12] */     
-      uint32_t opcode:5;  /* [27-23] */
-      uint32_t type:3;    /* [30-28] */
-      uint32_t tag:1      /* [31] */
-    }; 
-    uint32_t header;
-  };
 
-  struct {
-    uint32_t cmd_identifier:16;  /* [15-0]  */
-    uint32_t reserved:16;        /* [31-16] */
-  }; 
+inline static uint32_t sq_cmd_id_addr(uint32_t slot_addr)
+{
+    return slot_addr + sizeof(uint32_t);
+}
 
-}; 
+inline static uint32_t sq_cu_mask_addr(uint32_t slot_addr)
+{
+    return sq_cmd_id_addr(slot_addr) + sizeof(uint32_t);
+}
 
-struct ert_admin_sq_cmd {
-  union {
-    struct {
-      uint32_t state:4;   /* [3-0]   */
-      uint32_t custom:8;  /* [11-4]  */
-      uint32_t count:11;  /* [22-12] */     
-      uint32_t opcode:6;  /* [27-23] */
-      uint32_t type:2;    /* [30-28] */
-      uint32_t tag:1      /* [31] */
-    }; 
-    uint32_t header;
-  };
+inline static uint32_t sq_bo_addr_addr(uint32_t slot_addr)
+{
+    return sq_cu_mask_addr(slot_addr) + sizeof(uint32_t);
+}
 
-  struct {
-    uint32_t cmd_identifier:16;  /* [15-0]  */
-    uint32_t reserved:16;        /* [31-16] */
-  }; 
+inline static uint32_t cq_return_code_addr(uint32_t slot_addr) // 0x0
+{
+    return slot_addr;
+}
 
-}; 
+inline static uint32_t cq_cmd_specific_addr(uint32_t slot_addr) // 0x4
+{
+    return cq_return_code_addr(slot_addr) + sizeof(uint32_t);
+}
 
-struct ert_cq_cmd {
-    uint32_t return_code;
-    uint32_t command_specific;
-    struct {
-        uint32_t sq_pointer:16;      /* [15-0]  */
-        uint32_t reserved:16;        /* [31-16] */
-    };
-    struct {
-        uint32_t cmd_identifier:16;  /* [15-0]  */
-        uint32_t cmd_state:16;       /* [31-16] */
-    };
-};
+inline static uint32_t cq_sq_pointer_addr(uint32_t slot_addr)  // 0x8
+{
+    return cq_cmd_specific_addr(slot_addr) + sizeof(uint32_t);
+}
+
+inline static uint32_t cq_cmd_id_addr(uint32_t slot_addr) // 0xC
+{
+    return cq_sq_pointer_addr(slot_addr) + sizeof(uint32_t);
+}
+
+inline static uint32_t cq_cmd_state_addr(uint32_t slot_addr) // 0xE
+{
+    return cq_cmd_id_addr(slot_addr) + sizeof(uint16_t);
+}
+
+inline static uint32_t sq_slot_addr(uint32_t sq_slot_idx)
+{
+    return sq_offset + sq_slot_idx*sq_slot_size;
+}
+
+inline static uint32_t cq_slot_addr(uint32_t cq_tail_pointer)
+{
+    return cq_offset + cq_tail_pointer*cq_slot_size;
+}
+
 
 uint32_t readReg(uint32_t addr) {
   uint32_t val;
@@ -183,7 +180,6 @@ void ipu_isr(void)
      if (intc_mask & 0x10) {// host interrupt
           MB_PRINTF("SQ door bell rings, go to answer it\n");
           there_is_pending_cmd = 1;
-
      }
 
      if (intc_mask & 0x2)
@@ -210,21 +206,20 @@ void init_interrupt(void)
 void init_command_queue(void)
 {
     MB_PRINTF("Initial command queue\n");
-    uint32_t offset = 0;
 
+    cq_tail_pointer = 0;
 
-    sq_slot_size = 512;
-    cq_slot_size = 16;
+    sq_slot_size = XRT_SUB_Q1_SLOT_SIZE;
+    cq_slot_size = XRT_COM_Q1_SLOT_SIZE;
 
-    sq_num_slots = 4;
-    cq_num_slots = 4;
+    sq_num_slots = XRT_QUEUE1_SLOT_NUM;
+    cq_num_slots = XRT_QUEUE1_SLOT_NUM;
 
     sq_slot_mask = sq_num_slots-1;
     cq_slot_mask = cq_num_slots-1;
 
-
     sq_offset = IPU_SRAM_BASEADDR;
-    cq_offset = IPU_SRAM_BASEADDR + num_slots*sq_slot_size;
+    cq_offset = IPU_SRAM_BASEADDR + sq_num_slots*sq_slot_size;
 
     MB_PRINTF("sq_slot_size 0x%lx\n", sq_slot_size);
     MB_PRINTF("cq_slot_size 0x%lx\n", cq_slot_size);
@@ -250,49 +245,53 @@ int32_t sq_tail_pointer_empty(void)
 }
 
 
-uint32_t fetch_sq_tail(void)
+inline static uint16_t fetch_sq(void)
 {
     MB_PRINTF(" => %s \n", __func__);
+    uint32_t val;
 
     while (readReg(IPU_H2C_MB_STATUS) & 0x1)
         continue;
 
-    return readReg(IPU_H2C_MB_RDDATA) & sq_slot_mask;
+    val = readReg(IPU_H2C_MB_RDDATA);
+    MB_PRINTF(" <= %s %d\n", __func__, val);
+    return val & sq_slot_mask;
 }
 
 
-void submit_to_dpu(uint32_t sq_slot_idx)
+inline static void submit_to_dpu(uint16_t sq_slot_idx)
 {
-    MB_PRINTF(" => %s \n", __func__);
+    MB_PRINTF(" => %s sq_slot_idx %d\n", __func__, sq_slot_idx);
 
-    uint32_t sq_slot_offset = sq_slot_idx*sq_slot_size;
+    uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
 
-    MB_PRINTF("0x%lx = 0x%lx \n", sq_slot_offset, readReg(sq_slot_offset));
-    MB_PRINTF("0x%lx = 0x%lx \n", sq_slot_offset+4, readReg(sq_slot_offset+4));
+    //MB_PRINTF("0x%lx = 0x%lx \n", sq_addr, readReg(sq_addr));
+    //MB_PRINTF("0x%lx = 0x%lx \n", sq_cmd_id_addr(sq_addr), readReg(sq_cmd_id_addr(sq_addr)));
+    //MB_PRINTF("0x%lx = 0x%lx \n", sq_bo_addr_addr(sq_addr), readReg(sq_bo_addr_addr(sq_addr)));
+    writeReg(readReg(sq_bo_addr_addr(sq_addr)), 0x6C6C6548);
+    writeReg(readReg(sq_bo_addr_addr(sq_addr))+4, 0x6F57206F);
+    writeReg(readReg(sq_bo_addr_addr(sq_addr))+8, 0x00646C72);
 
     writeReg(IPU_AIE_BASEADDR,  0x1);
 }
 
-uint32_t command_id(uint32_t sq_slot_offset)
+inline static uint16_t command_id(uint32_t sq_slot_offset)
 {
     return readReg(sq_slot_offset+0x4) & 0xFFFF;
 }
 
-void complete_cmd(uint32_t sq_slot_idx)
+inline static void complete_cmd(uint16_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
 
-    uint32_t sq_slot_offset = sq_offset + sq_slot_idx*sq_slot_size;
-    uint32_t cq_slot_offset = cq_offset + cq_tail_pointer*cq_slot_size;
+    uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
+    uint32_t cq_addr = cq_slot_addr(cq_tail_pointer);
 
-    uint32_t cmd_id = command_id(sq_slot_offset);
+    uint16_t cmd_id = command_id(sq_addr);
 
-    writeReg(cq_offset+0x0, 0x0);
-    writeReg(cq_offset+0x8, sq_slot_idx);
-    writeReg(cq_offset+0xc, cmd_id);
-
-    //while (readReg(IPU_C2H_MB_STATUS) & 0x1)
-    //    continue;
+    writeReg(cq_addr, 0x0);
+    writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
+    writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 
     writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
 
@@ -301,20 +300,19 @@ void complete_cmd(uint32_t sq_slot_idx)
 
 void scheduler_loop(void)   
 {
-    MB_PRINTF("%s \n", __func__);
+    MB_PRINTF("=> %s \n", __func__);
+    uint16_t sq_slot_idx = 0;
     while (1) {
 
-        while (sq_tail_pointer_empty())
-            continue;
+        sq_slot_idx = fetch_sq();
 
-        uint32_t sq_slot_idx = fetch_sq_tail();
-    
         submit_to_dpu(sq_slot_idx);
 
         complete_cmd(sq_slot_idx);
 
-        break;
     }
+    MB_PRINTF("<= %s \n", __func__);
+
 }
 
 void init_comm_channel(void) {
@@ -329,6 +327,8 @@ void init_comm_channel(void) {
         writeReg(IPU_H2C_MB_RIT,  0x0);
         writeReg(IPU_H2C_MB_SIT,  0x0);
     } else {
+        MB_PRINTF("=> %s \n", __func__);
+
         writeReg(IPU_C2H_MB_RIT,  0x0);
         writeReg(IPU_C2H_MB_SIT,  0x0);
 
@@ -355,9 +355,9 @@ int main()
 
     init_command_queue();
 
-    init_interrupt();
-
     init_comm_channel();
+
+    //init_command_queue();
 
     scheduler_loop();
 
