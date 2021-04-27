@@ -258,7 +258,7 @@ inline static void submit_to_dpu(uint16_t sq_slot_idx)
     //writeReg(IPU_AIE_BASEADDR,  0x1);
 }
 
-inline static uint16_t command_id(uint32_t sq_slot_offset)
+inline static uint16_t sq_cmd_id(uint32_t sq_slot_offset)
 {
     return readReg(sq_slot_offset+0x4) & 0xFFFF;
 }
@@ -266,14 +266,14 @@ inline static uint16_t command_id(uint32_t sq_slot_offset)
 inline static void cq_enqueue(uint16_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
-    uint32_t cq_tail = cq_tail_pointer & cq_slot_mask;
-    cq_tail_pointer++;
+    uint32_t cq_tail = cq_tail_pointer++;
 
+    cq_tail &= cq_slot_mask;
 
     uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
     uint32_t cq_addr = cq_slot_addr((cq_tail));
 
-    uint16_t cmd_id = command_id(sq_addr);
+    uint16_t cmd_id = sq_cmd_id(sq_addr);
 
     MB_PRINTF("cq_addr 0x%lx \n", cq_addr);
 #if 0
@@ -289,11 +289,10 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
 void cu_task(void)   
 {
     MB_PRINTF("=> %s \n", __func__);
-    uint16_t sq_slot_idx = 0, i = 0;
+
     while (1) {
-    //for (i = 0; i < 16; ++i) {
-        //MB_PRINTF("test %s %d\n", __func__, i);
-        sq_slot_idx = sq_dequeue();
+
+        uint16_t sq_slot_idx = sq_dequeue();
 
         submit_to_dpu(sq_slot_idx);
 
