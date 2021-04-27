@@ -273,7 +273,7 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     uint16_t cmd_id = command_id(sq_addr);
 
     //writeReg(cq_addr, 0x0);
-    writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
+    //writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     //writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 
     writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
@@ -286,10 +286,10 @@ void cu_task(void)
 {
     MB_PRINTF("=> %s \n", __func__);
     uint16_t sq_slot_idx = 0, i = 0;
-    //while (1) {
-    for (i = 0; i < 16; ++i) {
-        MB_PRINTF("test %s %d\n", __func__, i);
-        //sq_slot_idx = sq_dequeue();
+    while (1) {
+    //for (i = 0; i < 16; ++i) {
+        //MB_PRINTF("test %s %d\n", __func__, i);
+        sq_slot_idx = sq_dequeue();
 
         submit_to_dpu(sq_slot_idx);
 
