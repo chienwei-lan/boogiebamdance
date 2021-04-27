@@ -291,7 +291,7 @@ void cu_task(void)
         MB_PRINTF("test %s %d\n", __func__, i);
         //sq_slot_idx = sq_dequeue();
 
-        //submit_to_dpu(sq_slot_idx);
+        submit_to_dpu(sq_slot_idx);
 
         //cq_enqueue(sq_slot_idx);
 
