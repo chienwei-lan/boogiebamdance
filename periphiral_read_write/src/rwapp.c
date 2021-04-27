@@ -272,7 +272,7 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
 
     uint16_t cmd_id = command_id(sq_addr);
 
-    //writeReg(cq_addr, 0x0);
+    writeReg(cq_addr, 0x0);
     //writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     //writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 
