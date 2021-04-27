@@ -245,19 +245,15 @@ int32_t sq_tail_pointer_empty(void)
 }
 
 
-inline static uint16_t fetch_sq(void)
+inline static uint16_t sq_dequeue(void)
 {
     MB_PRINTF(" => %s \n", __func__);
-    uint16_t val;
 
     while (readReg(IPU_H2C_MB_STATUS) & 0x1)
         continue;
 
-    val = readReg(IPU_H2C_MB_RDDATA);
-    MB_PRINTF(" <= %s %d\n", __func__, val);
-    return val & sq_slot_mask;
+    return readReg(IPU_H2C_MB_RDDATA) & sq_slot_mask;
 }
-
 
 inline static void submit_to_dpu(uint16_t sq_slot_idx)
 {
@@ -280,7 +276,7 @@ inline static uint16_t command_id(uint32_t sq_slot_offset)
     return readReg(sq_slot_offset+0x4) & 0xFFFF;
 }
 
-inline static void complete_cmd(uint16_t sq_slot_idx)
+inline static void cq_enqueue(uint16_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
 
@@ -301,14 +297,14 @@ inline static void complete_cmd(uint16_t sq_slot_idx)
 void scheduler_loop(void)   
 {
     MB_PRINTF("=> %s \n", __func__);
-    uint16_t sq_slot_idx = 0;
-    while (1) {
-
-        sq_slot_idx = fetch_sq();
+    uint16_t sq_slot_idx = 0, i;
+    //while (1) {
+    for (i = 0 ; i <16 ;++i) {
+        sq_slot_idx = sq_dequeue();
 
         submit_to_dpu(sq_slot_idx);
 
-        complete_cmd(sq_slot_idx);
+        cq_enqueue(sq_slot_idx);
 
     }
     MB_PRINTF("<= %s \n", __func__);
