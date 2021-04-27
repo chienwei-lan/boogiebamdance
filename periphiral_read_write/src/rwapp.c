@@ -169,7 +169,7 @@ void writeReg(uint32_t addr,uint32_t value) {
 	//MB_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
-
+#if 0
 void ipu_isr(void)
 {
      MB_PRINTF("=> %s \n", __func__);
@@ -201,7 +201,7 @@ void init_interrupt(void)
     writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
 
 }
-
+#endif
 
 void init_command_queue(void)
 {
