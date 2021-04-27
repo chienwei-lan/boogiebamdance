@@ -218,8 +218,8 @@ void init_command_queue(void)
     sq_slot_mask = sq_num_slots-1;
     cq_slot_mask = cq_num_slots-1;
 
-    sq_offset = IPU_SRAM_BASEADDR;
-    cq_offset = IPU_SRAM_BASEADDR + sq_num_slots*sq_slot_size;
+    sq_offset = IPU_DDR_BASEADDR;
+    cq_offset = IPU_DDR_BASEADDR + sq_num_slots*sq_slot_size;
 
     MB_PRINTF("sq_slot_size 0x%lx\n", sq_slot_size);
     MB_PRINTF("cq_slot_size 0x%lx\n", cq_slot_size);
