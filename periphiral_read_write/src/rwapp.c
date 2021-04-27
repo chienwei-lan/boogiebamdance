@@ -85,7 +85,6 @@
 
 const uint32_t max_slots = 16;
 
-static uint8_t there_is_pending_cmd = 0;
 static uint8_t tail_pointer_polling = 0;
 
 static uint16_t cq_tail_pointer = 0;
@@ -232,19 +231,6 @@ void init_command_queue(void)
     MB_PRINTF("CQ offset 0x%lx\n", cq_offset);
 }
 
-
-int32_t sq_tail_pointer_empty(void)
-{
-
-    while (!there_is_pending_cmd)
-        return 1;
-
-    there_is_pending_cmd = 0;
-
-    return 0;
-}
-
-
 inline static uint16_t sq_dequeue(void)
 {
     MB_PRINTF(" => %s \n", __func__);
@@ -268,7 +254,7 @@ inline static void submit_to_dpu(uint16_t sq_slot_idx)
     writeReg(readReg(sq_bo_addr_addr(sq_addr))+4, 0x6F57206F);
     writeReg(readReg(sq_bo_addr_addr(sq_addr))+8, 0x00646C72);
 
-    writeReg(IPU_AIE_BASEADDR,  0x1);
+    //writeReg(IPU_AIE_BASEADDR,  0x1);
 }
 
 inline static uint16_t command_id(uint32_t sq_slot_offset)
@@ -291,20 +277,22 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
 
     writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
 
+    MB_PRINTF(" <= %s \n", __func__);
 }
 
 
-void scheduler_loop(void)   
+void cu_task(void)   
 {
     MB_PRINTF("=> %s \n", __func__);
-    uint16_t sq_slot_idx = 0, i;
+    uint16_t sq_slot_idx = 0, i = 0;
     //while (1) {
-    for (i = 0 ; i <16 ;++i) {
-        sq_slot_idx = sq_dequeue();
+    for (i = 0; i < 16; ++i) {
+        MB_PRINTF("test %s %d\n", __func__, i);
+        //sq_slot_idx = sq_dequeue();
 
-        submit_to_dpu(sq_slot_idx);
+        //submit_to_dpu(sq_slot_idx);
 
-        cq_enqueue(sq_slot_idx);
+        //cq_enqueue(sq_slot_idx);
 
     }
     MB_PRINTF("<= %s \n", __func__);
@@ -353,9 +341,7 @@ int main()
 
     init_comm_channel();
 
-    //init_command_queue();
-
-    scheduler_loop();
+    cu_task();
 
     cleanup_platform();
     return 0;
