@@ -276,8 +276,8 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     uint16_t cmd_id = sq_cmd_id(sq_addr);
 
     MB_PRINTF("cq_addr 0x%lx \n", cq_addr);
-#if 0
-    not sure why hang here
+#if 1
+    //not sure why hang here
     writeReg(cq_addr, 0x0);
     writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
