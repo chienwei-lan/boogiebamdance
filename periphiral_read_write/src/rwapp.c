@@ -266,9 +266,12 @@ inline static uint16_t command_id(uint32_t sq_slot_offset)
 inline static void cq_enqueue(uint16_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
+    uint32_t cq_tail = cq_tail_pointer & cq_slot_mask;
+    cq_tail_pointer++;
+
 
     uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
-    uint32_t cq_addr = cq_slot_addr((cq_tail_pointer & cq_slot_mask));
+    uint32_t cq_addr = cq_slot_addr((cq_tail));
 
     uint16_t cmd_id = command_id(sq_addr);
 
@@ -279,7 +282,7 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 #endif
-    writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
+    writeReg(IPU_C2H_MB_WRDATA, cq_tail);
 }
 
 
