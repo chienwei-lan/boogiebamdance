@@ -276,7 +276,7 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 
-    writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
+    //writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
 
     MB_PRINTF(" <= %s \n", __func__);
 }
@@ -293,7 +293,7 @@ void cu_task(void)
 
         submit_to_dpu(sq_slot_idx);
 
-        //cq_enqueue(sq_slot_idx);
+        cq_enqueue(sq_slot_idx);
 
     }
     MB_PRINTF("<= %s \n", __func__);
