@@ -130,21 +130,17 @@ int main(int argc, char **argv) {
     cmdp->data[0] = boPAddr;	// 32 bits BO address
     cmdp->data[1] = 4096;	// size
 
-    xp_xclExecBuf(handle, cmdBoHdl);
-    xp_xclExecWait(handle, 0);
 
-    char host_empty_buf[16] = {0};
+    for (uint32_t i = 0; i < 5 ;++i) {
+        xp_xclExecBuf(handle, cmdBoHdl);
+        xp_xclExecWait(handle, 0);
 
-    xp_xclSyncBO(handle, boHdl, XCL_BO_SYNC_BO_FROM_DEVICE, 4096, 0);
-    std::string outString(boMap);
-    std::cout << "Output string is: " << outString << std::endl;
-
-    usleep(2000000);
-    xp_xclExecBuf(handle, cmdBoHdl);
-    xp_xclExecWait(handle, 0);
-
-    std::string emptystring(boMap);
-    std::cout << "Output string is: " << emptystring << std::endl;    
+        xp_xclSyncBO(handle, boHdl, XCL_BO_SYNC_BO_FROM_DEVICE, 4096, 0);
+        std::string outString(boMap);
+        std::cout << "Output string is: " << outString << std::endl;
+    }
+    //usleep(2000000);
+ 
     xp_xclFreeBO(handle, boHdl);
     xp_xclFreeBO(handle, cmdBoHdl);
 #endif

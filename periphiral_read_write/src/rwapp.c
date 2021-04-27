@@ -280,8 +280,6 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 #endif
     writeReg(IPU_C2H_MB_WRDATA, cq_tail_pointer++);
-
-    //MB_PRINTF(" <= %s \n", __func__);
 }
 
 
