@@ -237,7 +237,7 @@ xp_xclExecWait(xclDeviceHandle handle, int timeoutMilliSec)
 	uint16_t cq_tail = read_cq_doorbell(handle);
 
 	struct xrt_com_queue_entry comq;
-	dequeue(handle, (uint32_t *)&comq, 0x800);
+	dequeue(handle, (uint32_t *)&comq, IPU_DDR_BASEADDR+0x800);
 
 	std::cout << "completed cid is " << comq.cid << std::endl;
 	std::cout << "completed sqhead is " << comq.sqhead << std::endl;

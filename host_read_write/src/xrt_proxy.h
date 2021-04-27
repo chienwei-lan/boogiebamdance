@@ -36,7 +36,7 @@
 #include "ipu_platform_host.h"
 
 #define XRT_PROXY_MEM_SIZE	(64 * 1024)
-#define	XRT_PROXY_MEM_BASE	(IPU_SRAM_BASEADDR + 4 * 1024)
+#define	XRT_PROXY_MEM_BASE	(IPU_DDR_BASEADDR + 4 * 1024)
 
 int xp_xclAllocBO(xclDeviceHandle handle, size_t size, int unused, unsigned flags);
 void *xp_xclMapBO(xclDeviceHandle handle, unsigned int boHandle, bool write);
