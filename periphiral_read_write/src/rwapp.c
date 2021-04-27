@@ -267,8 +267,8 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
 {
     MB_PRINTF(" => %s \n", __func__);
 
-    //uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
-    //uint32_t cq_addr = cq_slot_addr(cq_tail_pointer);
+    uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
+    uint32_t cq_addr = cq_slot_addr(cq_tail_pointer);
 
     //uint16_t cmd_id = command_id(sq_addr);
 
