@@ -86,6 +86,7 @@
 const uint32_t max_slots = 16;
 
 static uint8_t tail_pointer_polling = 0;
+static uint8_t there_is_pending_cmd = 0;
 
 static uint16_t cq_tail_pointer = 0;
 
