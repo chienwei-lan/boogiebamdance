@@ -17,7 +17,7 @@ compile : ert_test.c platform.c
 	echo 'Finished building: /platform.c'
 	echo 'Building target: ert_test.elf'
 	echo 'Invoking: MicroBlaze gcc linker'
-	mb-gcc $(LINKFLAGS) -o "ert_test.elf"  ./obj/ert_test.o ./obj/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+	mb-gcc $(LINKFLAGS) -o "ert_test.elf"  ./obj/ert_test.o ./obj/platform.o   -Wl,--start-group,-L$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform,-lxil,-lgcc,-lc,--end-group
 	echo 'Finished building target: ert_test.elf'
 
 run: ert_test.elf
