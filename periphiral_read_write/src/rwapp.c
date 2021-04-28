@@ -248,9 +248,9 @@ inline static void submit_to_dpu(uint16_t sq_slot_idx)
 
     uint32_t sq_addr = sq_slot_addr(sq_slot_idx);
 
-    //MB_PRINTF("0x%lx = 0x%lx \n", sq_addr, readReg(sq_addr));
-    //MB_PRINTF("0x%lx = 0x%lx \n", sq_cmd_id_addr(sq_addr), readReg(sq_cmd_id_addr(sq_addr)));
-    //MB_PRINTF("0x%lx = 0x%lx \n", sq_bo_addr_addr(sq_addr), readReg(sq_bo_addr_addr(sq_addr)));
+    MB_PRINTF("0x%lx = 0x%lx \n", sq_addr, readReg(sq_addr));
+    MB_PRINTF("0x%lx = 0x%lx \n", sq_cmd_id_addr(sq_addr), readReg(sq_cmd_id_addr(sq_addr)));
+    MB_PRINTF("0x%lx = 0x%lx \n", sq_bo_addr_addr(sq_addr), readReg(sq_bo_addr_addr(sq_addr)));
     writeReg(readReg(sq_bo_addr_addr(sq_addr)), 0x6C6C6548);
     writeReg(readReg(sq_bo_addr_addr(sq_addr))+4, 0x6F57206F);
     writeReg(readReg(sq_bo_addr_addr(sq_addr))+8, 0x00646C72);
