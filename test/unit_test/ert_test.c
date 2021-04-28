@@ -61,14 +61,14 @@ int main()
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
             readReg((IPU_SRAM_BASEADDR+offset));
     }
-
+#if 0
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
     for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
             writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
             readReg((IPU_DDR_BASEADDR+offset));
     }
-
+#endif
     //ACCESS INTC
     ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
     writeReg(IPU_INTC_BASEADDR,0x1);
