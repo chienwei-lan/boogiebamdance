@@ -239,6 +239,7 @@ xp_xclExecWait(xclDeviceHandle handle, int timeoutMilliSec)
 	struct xrt_com_queue_entry comq;
 	dequeue(handle, (uint32_t *)&comq, IPU_DDR_BASEADDR+0x800);
 
+	std::cout << "cq_tail " << cq_tail << std::endl;
 	std::cout << "completed cid is " << comq.cid << std::endl;
 	std::cout << "completed sqhead is " << comq.sqhead << std::endl;
 	std::cout << "completed state is " << comq.cstate << std::endl;
