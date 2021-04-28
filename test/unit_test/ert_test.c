@@ -57,16 +57,16 @@ int main()
     init_platform();
 
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
-    for (uint32_t offset = 0x4; offset < 0x20000000; offset=offset<<1) {
+    for (uint32_t offset = 0x4; offset < 0x20000000; offset<<=1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
             readReg((IPU_SRAM_BASEADDR+offset));
     }
 
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
-    for (uint32_t offset = 0x4; offset < 0x200000000; offset=offset<<1) {
-            writeReg(IPU_DDR_BASEADDR+offset,0xABCD1234);
-            readReg(IPU_DDR_BASEADDR+offset);
+    for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
+            writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
+            readReg((IPU_DDR_BASEADDR+offset));
     }
 
     //ACCESS INTC
