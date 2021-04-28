@@ -35,7 +35,7 @@
 
 #include "ipu_platform_host.h"
 
-#define XRT_QUEUE_BASE		IPU_SRAM_BASEADDR
+#define XRT_QUEUE_BASE		IPU_DDR_BASEADDR
 #define XRT_QUEUE1_SUB_BASE	XRT_QUEUE_BASE
 #define	XRT_QUEUE1_COM_BASE	(XRT_QUEUE1_SUB_BASE + 512 * 4)
 
