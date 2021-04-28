@@ -47,7 +47,7 @@ uint32_t readReg(uint32_t addr) {
   return val;
 }
 
-void writeReg(uint32_t addr,uint32_t value) {
+void writeReg(uint64_t addr,uint32_t value) {
   ERT_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
@@ -57,14 +57,14 @@ int main()
     init_platform();
 
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
-    for (uint64_t offset = 0; offset < 0x20000000; offset=offset<<1) {
+    for (uint32_t offset = 0x4; offset < 0x20000000; offset=offset<<1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
             readReg((IPU_SRAM_BASEADDR+offset));
     }
 
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
-    for (uint64_t offset = 0; offset < 0x200000000; offset=offset<<1) {
+    for (uint32_t offset = 0x4; offset < 0x200000000; offset=offset<<1) {
             writeReg(IPU_DDR_BASEADDR+offset,0xABCD1234);
             readReg(IPU_DDR_BASEADDR+offset);
     }
