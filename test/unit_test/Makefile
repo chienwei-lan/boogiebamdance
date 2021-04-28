@@ -1,7 +1,7 @@
 ifeq ($(IPU_HW_EMU_HOME),)
   $(error IPU_HW_EMU_HOME is not set)
 endif
-CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" _I../include/ -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/include -I./ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header 
+CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" _I./../include/ -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/include -I./ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header 
 LINKFLAGS=-Wl,-T -Wl,lscript.ld -L./platform/lib -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -Wl,--gc-sections
 
 all : compile run
