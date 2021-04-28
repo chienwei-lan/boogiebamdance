@@ -166,7 +166,7 @@ uint32_t readReg(uint32_t addr) {
 }
 
 void writeReg(uint32_t addr,uint32_t value) {
-	//MB_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
+	MB_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
 #if 0
