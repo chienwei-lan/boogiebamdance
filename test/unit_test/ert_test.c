@@ -32,9 +32,9 @@
 
 #include <stdio.h>
 #include "platform.h"
-#include "xil_printf.h"
 #include "ipu_platform_uc.h"
 #include "xrt_queue.h"
+#include "xil_printf.h"
 
 #define ERT_PRINTF(fmt, arg...)   \
         printf("[ Microblaze ]" fmt "\n", ##arg)
