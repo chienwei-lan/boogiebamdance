@@ -2,7 +2,7 @@ ifeq ($(IPU_HW_EMU_HOME),)
   $(error IPU_HW_EMU_HOME is not set)
 endif
 CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" -I./../include -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/ -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/include -I./ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header 
-LINKFLAGS=-Wl,-T -Wl,lscript.ld -L./platform/lib -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -Wl,--gc-sections
+LINKFLAGS=-Wl,-T -Wl,lscript.ld -L$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/lib -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -Wl,--gc-sections
 
 all : compile run
 
@@ -17,7 +17,7 @@ compile : ert_test.c platform.c
 	echo 'Finished building: /platform.c'
 	echo 'Building target: ert_test.elf'
 	echo 'Invoking: MicroBlaze gcc linker'
-	mb-gcc $(LINKFLAGS) -o "ert_test.elf"  ./obj/ert_test.o ./obj/platform.o   -Wl,--start-group,-L$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/lib,-lxil,-lgcc,-lc,--end-group
+	mb-gcc $(LINKFLAGS) -o "ert_test.elf"  ./obj/ert_test.o ./obj/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
 	echo 'Finished building target: ert_test.elf'
 
 run: ert_test.elf
