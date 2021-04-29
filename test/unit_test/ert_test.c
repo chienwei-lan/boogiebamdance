@@ -90,7 +90,6 @@ int main()
     init_platform();
     uint32_t val;
 
-//    init_ert_test_interrupt();
 #if 1
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
     for (uint32_t offset = 0x4; offset < 0x80000; offset<<=1) {
@@ -113,11 +112,7 @@ int main()
             }
     }
 #endif
-    init_ert_test_interrupt();
-    //ACCESS INTC
- //   ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
- //   writeReg(IPU_INTC_BASEADDR,0x1);
-    //readReg(IPU_INTC_BASEADDR);
+    //init_ert_test_interrupt();
     //ACCESS C2H Mailbox
     ERT_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
     writeReg(IPU_C2HMAILBOX_BASEADDR,0xAE);
