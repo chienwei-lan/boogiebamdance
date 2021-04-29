@@ -78,6 +78,14 @@ int main()
                 return 0;
             }
     }
+    for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
+            writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
+            val = readReg((IPU_DDR_BASEADDR+offset));
+            if (val !=0xABCD1234) {
+                ERT_PRINTF("Result mismatch write 0xABCD1234, failed @ addr 0x%lx, read 0x%lx \n", IPU_DDR_BASEADDR+offset, val);
+                return 0;
+            }
+    }
 #endif
     //ACCESS INTC
     ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
