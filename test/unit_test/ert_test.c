@@ -70,7 +70,7 @@ int main()
 #if 1
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
-    for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
+    for (uint32_t offset = 0x0; offset < 0x1000; offset+=4) {
             writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
             val = readReg((IPU_DDR_BASEADDR+offset));
             if (val !=0xABCD1234) {
