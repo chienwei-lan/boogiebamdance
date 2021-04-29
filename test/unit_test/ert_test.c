@@ -55,11 +55,15 @@ void writeReg(uint32_t addr,uint32_t value) {
 int main()
 {
     init_platform();
-
+    uint32_t val;
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
     for (uint32_t offset = 0x4; offset < 0x20000000; offset<<=1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
-            readReg((IPU_SRAM_BASEADDR+offset));
+            val = readReg((IPU_SRAM_BASEADDR+offset));
+            if (val !=0xABCD1234) {
+                ERT_PRINTF("Result mismatch write 0xABCD1234, failed @ addr 0x%lx, read 0x%lx \n", offset, val);
+                return 0;
+            }
     }
 #if 0
     //RW to DDR
@@ -94,6 +98,8 @@ int main()
     writeReg(IPU_STRM2AXI2_BASEADDR,0x1);
     readReg(IPU_STRM2AXI2_BASEADDR);
 
+
+    ERT_PRINTF("ERT UNIT TEST PASSED\n");
     cleanup_platform();
     return 0;
 }
