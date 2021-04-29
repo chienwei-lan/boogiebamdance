@@ -47,7 +47,7 @@ uint32_t readReg(uint32_t addr) {
   return val;
 }
 
-void writeReg(uint64_t addr,uint32_t value) {
+void writeReg(uint32_t addr,uint32_t value) {
   ERT_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
@@ -65,7 +65,7 @@ int main()
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
     for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
-            writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
+            writeReg((IPU_DDR_BASEADDR+offset),0x1234);
             readReg((IPU_DDR_BASEADDR+offset));
     }
 #endif
