@@ -120,7 +120,7 @@ int main()
             }
     }
 
-    init_ert_test_interrupt()
+    init_ert_test_interrupt();
     //ACCESS INTC
  //   ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
  //   writeReg(IPU_INTC_BASEADDR,0x1);
