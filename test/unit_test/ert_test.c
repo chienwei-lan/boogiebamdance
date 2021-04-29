@@ -36,6 +36,13 @@
 #include "xrt_queue.h"
 #include "xil_printf.h"
 
+#define IPU_INTC_ISR_ADDR                 (IPU_INTC_BASEADDR)        /* status */
+#define IPU_INTC_IPR_ADDR                 (IPU_INTC_BASEADDR + 0x4)  /* pending */
+#define IPU_INTC_IER_ADDR                 (IPU_INTC_BASEADDR + 0x8)  /* enable */
+#define IPU_INTC_IAR_ADDR                 (IPU_INTC_BASEADDR + 0x0C) /* acknowledge */
+#define IPU_INTC_MER_ADDR                 (IPU_INTC_BASEADDR + 0x1C) /* master enable */
+
+
 #define ERT_PRINTF(fmt, arg...)   \
         printf("[ Microblaze ]" fmt "\n", ##arg)
 
@@ -52,11 +59,37 @@ void writeReg(uint32_t addr,uint32_t value) {
   *((uint32_t*)(addr))=value;
 }
 
+void ert_test_isr(void)
+{
+     ERT_PRINTF("=> %s \n", __func__);
+     uint32_t intc_mask = readReg(IPU_INTC_IPR_ADDR);
+
+     ERT_PRINTF("intc_mask 0x%lx \n", intc_mask);
+
+     writeReg(IPU_INTC_IAR_ADDR, intc_mask);
+}
+
+void init_ert_test_interrupt(void)
+{
+    ERT_PRINTF("%s\n", __func__);
+
+    microblaze_register_handler((XInterruptHandler)ert_test_isr, (void *) 0);
+
+    microblaze_enable_interrupts();
+
+    writeReg(IPU_INTC_MER_ADDR,0x1);
+    writeReg(IPU_INTC_IER_ADDR,0xFFFFFFFF);
+
+
+    writeReg(IPU_INTC_ISR_ADDR,0x1);
+
+}
+
 int main()
 {
     init_platform();
     uint32_t val;
-#if 1
+
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
     for (uint32_t offset = 0x4; offset < 0x80000; offset<<=1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
@@ -66,10 +99,9 @@ int main()
                 return 0;
             }
     }
-#endif
-#if 1
     //RW to DDR
     ERT_PRINTF("READ/WRITE TEST FOR DDR\n");
+#if 0
     for (uint32_t offset = 0x0; offset < 0x1000; offset+=4) {
             writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
             val = readReg((IPU_DDR_BASEADDR+offset));
@@ -78,6 +110,7 @@ int main()
                 return 0;
             }
     }
+#endif
     for (uint32_t offset = 0x4; offset < 0x20000000; offset<<=1) {
             writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
             val = readReg((IPU_DDR_BASEADDR+offset));
@@ -86,11 +119,12 @@ int main()
                 return 0;
             }
     }
-#endif
+
+    init_ert_test_interrupt()
     //ACCESS INTC
-    ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
-    writeReg(IPU_INTC_BASEADDR,0x1);
-    readReg(IPU_INTC_BASEADDR);
+ //   ERT_PRINTF("READ/WRITE TEST FOR INTC\n");
+ //   writeReg(IPU_INTC_BASEADDR,0x1);
+    //readReg(IPU_INTC_BASEADDR);
     //ACCESS C2H Mailbox
     ERT_PRINTF("READ/WRITE TEST FOR C2HMAILBOX\n");
     writeReg(IPU_C2HMAILBOX_BASEADDR,0xAE);
