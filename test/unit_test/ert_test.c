@@ -58,7 +58,7 @@ int main()
     uint32_t val;
 #if 0
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
-    for (uint32_t offset = 0x4; offset < 0x20000000; offset<<=1) {
+    for (uint32_t offset = 0x4; offset < 0x80000; offset<<=1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
             val = readReg((IPU_SRAM_BASEADDR+offset));
             if (val !=0xABCD1234) {
@@ -78,7 +78,7 @@ int main()
                 return 0;
             }
     }
-    for (uint32_t offset = 0x4; offset < 0x200000000; offset<<=1) {
+    for (uint32_t offset = 0x4; offset < 0x20000000; offset<<=1) {
             writeReg((IPU_DDR_BASEADDR+offset),0xABCD1234);
             val = readReg((IPU_DDR_BASEADDR+offset));
             if (val !=0xABCD1234) {
