@@ -91,7 +91,7 @@ int main()
     uint32_t val;
 
 //    init_ert_test_interrupt();
-#if 0
+#if 1
     ERT_PRINTF("READ/WRITE TEST FOR SRAM\n");
     for (uint32_t offset = 0x4; offset < 0x80000; offset<<=1) {
             writeReg((IPU_SRAM_BASEADDR+offset),0xABCD1234);
