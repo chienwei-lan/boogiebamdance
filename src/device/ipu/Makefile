@@ -7,8 +7,6 @@ LINKFLAGS=-Wl,-T -Wl,lscript.ld -L$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/pl
 export HW_EM_ENABLE_SOCKET=false
 export HW_EM_K2X_SOCKET=false
 
-mkdir obj
-
 all : compile run
 
 compile : rwapp.c $(PWD)/../platform/platform.c
