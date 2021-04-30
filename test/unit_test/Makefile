@@ -1,8 +1,12 @@
 ifeq ($(IPU_HW_EMU_HOME),)
   $(error IPU_HW_EMU_HOME is not set)
 endif
-CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" -I./../include -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/ -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/include -I./ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header 
+CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" -I./../include -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/ -I$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/include -I./ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header  -I$(IPU_HW_EMU_HOME)/release/driver
 LINKFLAGS=-Wl,-T -Wl,lscript.ld -L$(IPU_HW_EMU_HOME)/sw/periphiral_read_write/platform/lib -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -Wl,--gc-sections
+
+export HW_EM_ENABLE_SOCKET=false
+export HW_EM_K2X_SOCKET=false
+
 
 all : compile run
 

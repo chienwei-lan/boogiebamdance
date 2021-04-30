@@ -1,8 +1,11 @@
 ifeq ($(IPU_HW_EMU_HOME),)
   $(error IPU_HW_EMU_HOME is not set)
 endif
-CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" -I./platform/include -I./src/ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header 
+CFLAGS=-Wall -O0 -g3 -c -fmessage-length=0 -MT"./obj/platform.o" -I./platform/include -I./src/ -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -I$(IPU_HW_EMU_HOME)/release/header -I$(IPU_HW_EMU_HOME)/release/driver
 LINKFLAGS=-Wl,-T -Wl,src/lscript.ld -L./platform/lib -mlittle-endian -mcpu=v11.0 -mxl-soft-mul -Wl,--no-relax -Wl,--gc-sections
+
+export HW_EM_ENABLE_SOCKET=false
+export HW_EM_K2X_SOCKET=false
 
 all : compile run
 
