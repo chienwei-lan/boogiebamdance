@@ -21,16 +21,16 @@ compile : rwapp.c $(PWD)/../platform/platform.c
 	echo 'Invoking: MicroBlaze gcc compiler'
 	mb-gcc $(CFLAGS) -MF"./obj/platform.d" -MT"./obj/platform.o" -o "obj/platform.o" "$(PWD)/../platform/platform.c"
 	echo 'Finished building: $(PWD)/../platform/platform.c'
-	echo 'Building target: apprw.elf'
+	echo 'Building target: ert.elf'
 	echo 'Invoking: MicroBlaze gcc linker'
-	mb-gcc $(LINKFLAGS) -o "apprw.elf"  ./obj/rwapp.o ./obj/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
-	echo 'Finished building target: apprw.elf'
+	mb-gcc $(LINKFLAGS) -o "ert.elf"  ./obj/rwapp.o ./obj/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+	echo 'Finished building target: ert.elf'
 
-run: apprw.elf
-	$(IPU_HW_EMU_HOME)/release/run.sh -a $(PWD)/apprw.elf
+run: ert.elf
+	$(IPU_HW_EMU_HOME)/release/run.sh -a $(PWD)/ert.elf
 
-run_dbg: apprw.elf
-	$(IPU_HW_EMU_HOME)/release/run.sh -a $(PWD)/apprw.elf -g
+run_dbg: ert.elf
+	$(IPU_HW_EMU_HOME)/release/run.sh -a $(PWD)/ert.elf -g
 
 clean :
 	rm -rf ert.elf obj/*.o obj/*.d run_hw_emu
