@@ -45,13 +45,13 @@ uint32_t readReg(xclDeviceHandle& handle, uint32_t addr)
 {
   uint32_t value;
   xclRead(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
-  printf("Reading From Address 0x%x value=0x%x\n",addr,value);
+  //printf("Reading From Address 0x%x value=0x%x\n",addr,value);
   return value;
 }
 
 void writeReg(xclDeviceHandle& handle, uint32_t addr, uint32_t value) 
 {
-	printf("Writing to Address 0x%x value=0x%x\n",addr,value);
+	//printf("Writing to Address 0x%x value=0x%x\n",addr,value);
     xclWrite(handle, XCL_ADDR_KERNEL_CTRL, addr, (void*)(&value), 4);
 }
 
