@@ -30,7 +30,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <fstream>
 
-
 #include "xclhal2.h"
 #include "xclbin.h"
 #include "ert.h"
@@ -116,6 +115,8 @@ int main(int argc, char **argv) {
     uint32_t boPAddr = boProp.paddr;
     std::cout << "data bo paddr is " << boPAddr << std::endl;
 
+    writeReg(handle, 0x104000C, 0x1);
+
     unsigned int cmdBoHdl = xp_xclAllocBO(handle, XRT_SUB_Q1_SLOT_SIZE, 0, XCL_BO_FLAGS_EXECBUF);
     std::cout << "cmd bo handler is " << boHdl << std::endl;
     void *cmdBoMap = xp_xclMapBO(handle, cmdBoHdl, 1);
@@ -131,7 +132,7 @@ int main(int argc, char **argv) {
     cmdp->data[1] = 4096;	// size
 
 
-    for (uint32_t i = 0; i < 5 ;++i) {
+    for (uint32_t i = 0; i < 2 ;++i) {
         xp_xclExecBuf(handle, cmdBoHdl);
         xp_xclExecWait(handle, 0);
 

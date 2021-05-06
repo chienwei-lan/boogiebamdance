@@ -85,7 +85,7 @@
 
 const uint32_t max_slots = 16;
 
-static uint8_t tail_pointer_polling = 0;
+volatile uint8_t tail_pointer_polling = 0;
 static uint8_t there_is_pending_cmd = 0;
 
 static uint16_t cq_tail_pointer = 0;
@@ -169,7 +169,7 @@ void writeReg(uint32_t addr,uint32_t value) {
   //MB_PRINTF("Writing to Address 0x%lx value=0x%lx\n",addr,value);
   *((uint32_t*)(addr))=value;
 }
-#if 0
+#if 1
 void ipu_isr(void)
 {
      MB_PRINTF("=> %s \n", __func__);
@@ -181,6 +181,12 @@ void ipu_isr(void)
           MB_PRINTF("SQ door bell rings, go to answer it\n");
           there_is_pending_cmd = 1;
      }
+
+     if (intc_mask & 0x4) {// host interrupt
+          MB_PRINTF("SQ door bell rings, go to answer it\n");
+          there_is_pending_cmd = 1;
+     }
+
 
      if (intc_mask & 0x2)
         MB_PRINTF("DPU comes back\n");
@@ -236,10 +242,16 @@ inline static uint16_t sq_dequeue(void)
 {
     MB_PRINTF(" => %s \n", __func__);
 
-    while (readReg(IPU_H2C_MB_STATUS) & 0x1)
-        continue;
 
-    return readReg(IPU_H2C_MB_RDDATA) & sq_slot_mask;
+#if 1
+    while (!there_is_pending_cmd)
+        continue;
+#else
+    while (!readReg(0x1050004))
+        continue;
+#endif
+    there_is_pending_cmd = 0;
+    return readReg(0x1050000) & sq_slot_mask;
 }
 
 inline static void submit_to_dpu(uint16_t sq_slot_idx)
@@ -282,7 +294,8 @@ inline static void cq_enqueue(uint16_t sq_slot_idx)
     writeReg(cq_sq_pointer_addr(cq_addr), sq_slot_idx);
     writeReg(cq_cmd_id_addr(cq_addr), cmd_id);
 #endif
-    writeReg(IPU_C2H_MB_WRDATA, cq_tail);
+    writeReg(0x1020000, cq_tail);
+    writeReg(0x1020004, 1);
 }
 
 
@@ -341,9 +354,11 @@ int main()
 {
     init_platform();
 
+    init_interrupt();
+
     init_command_queue();
 
-    init_comm_channel();
+    //init_comm_channel();
 
     cu_task();
 

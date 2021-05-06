@@ -158,23 +158,25 @@ dequeue(xclDeviceHandle& handle, uint32_t *data, uint32_t addr)
 static void
 write_sq_doorbell(xclDeviceHandle& handle, uint16_t tail)
 {
-	writeReg(handle, IPU_H2CMAILBOX_BASEADDR, tail);
+	writeReg(handle, 0x1040000, tail);
+	writeReg(handle, 0x1040000, 1);
 }
 
 uint16_t
 read_cq_doorbell(xclDeviceHandle& handle)
 {
 	while (1) {
-		uint8_t status = readReg(handle, IPU_C2HMAILBOX_BASEADDR + 0x10);
-		if (!(status & 1))
-			return readReg(handle, IPU_C2HMAILBOX_BASEADDR + 0x8);
+		uint8_t status = readReg(handle, 0x1030004);
+
+		if (status & 1) {
+			return readReg(handle, 0x1030000);
+		}
 	}
 }
 
 int
 xp_xclAllocBO(xclDeviceHandle handle, size_t size, int unused, unsigned flags)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	if (flags & XCL_BO_FLAGS_EXECBUF)
 		return alloc_ebo(size);
@@ -186,7 +188,6 @@ xp_xclAllocBO(xclDeviceHandle handle, size_t size, int unused, unsigned flags)
 void *
 xp_xclMapBO(xclDeviceHandle handle, unsigned int boHandle, bool write)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	if (boHandle == EBO_HDL)
 		return map_ebo();
@@ -201,7 +202,6 @@ xp_xclMapBO(xclDeviceHandle handle, unsigned int boHandle, bool write)
 int
 xp_xclGetBOProperties(xclDeviceHandle handle, unsigned int boHandle, xclBOProperties *properties)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	if (boHandle != DBO_HDL || g_dbo_hdl != DBO_HDL) {
 		std::cout << "BO " << boHandle << " does not exist." << std::endl;
@@ -215,7 +215,6 @@ xp_xclGetBOProperties(xclDeviceHandle handle, unsigned int boHandle, xclBOProper
 int
 xp_xclExecBuf(xclDeviceHandle handle, unsigned int cmdBO)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	if (cmdBO != EBO_HDL) {
 		std::cout << "BO " << cmdBO << " does not exist." << std::endl;
@@ -232,7 +231,6 @@ xp_xclExecBuf(xclDeviceHandle handle, unsigned int cmdBO)
 int
 xp_xclExecWait(xclDeviceHandle handle, int timeoutMilliSec)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	uint16_t cq_tail = read_cq_doorbell(handle);
 
@@ -268,7 +266,6 @@ xp_xclSyncBO(xclDeviceHandle handle, unsigned int boHandle, xclBOSyncDirection d
 void
 xp_xclFreeBO(xclDeviceHandle handle, unsigned int boHandle)
 {
-	printf("__larry_debug: enter %s\n", __func__);
 
 	if (boHandle == g_ebo_hdl)
 		free_ebo();
