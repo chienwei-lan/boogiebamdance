@@ -158,19 +158,18 @@ dequeue(xclDeviceHandle& handle, uint32_t *data, uint32_t addr)
 static void
 write_sq_doorbell(xclDeviceHandle& handle, uint16_t tail)
 {
-	writeReg(handle, 0x1040000, tail);
-	writeReg(handle, 0x1040000, 1);
+	writeReg(handle, 0x1040000, tail | 0x1000);
+	//writeReg(handle, 0x1040000, 1);
 }
 
 uint16_t
 read_cq_doorbell(xclDeviceHandle& handle)
 {
 	while (1) {
-		uint8_t status = readReg(handle, 0x1030004);
+		uint16_t cq_tail = readReg(handle, 0x1030000) & 0xFFFF;
 
-		if (status & 1) {
-			return readReg(handle, 0x1030000);
-		}
+		if (cq_tail & 0x1000)
+			return cq_tail;
 	}
 }
 
